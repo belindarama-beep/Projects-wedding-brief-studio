@@ -117,15 +117,15 @@ export default async function ProjectPage() {
     }
   }
 
-  const { data: latestDirectionVersion } = await supabase
+  const { data: directionVersionRows } = await supabase
     .from("direction_versions")
     .select(
       "id, project_id, version_number, content, status, diff_from_previous, created_at, approved_at",
     )
     .eq("project_id", project.id)
-    .order("version_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order("version_number", { ascending: false });
+
+  const directionVersions = (directionVersionRows ?? []) as DirectionVersion[];
 
   return (
     <>
@@ -140,9 +140,7 @@ export default async function ProjectPage() {
         initialExtractedItems={extractedItems}
         initialFlags={flags}
         initialResolutions={resolutions}
-        initialLatestDirectionVersion={
-          latestDirectionVersion as DirectionVersion | null
-        }
+        initialDirectionVersions={directionVersions}
       />
     </>
   );

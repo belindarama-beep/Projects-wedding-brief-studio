@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { DirectionView } from "@/components/DirectionView";
 import type {
   DirectionVersion,
   Extraction,
@@ -46,14 +47,14 @@ export function ExtractionView({
   initialExtractedItems,
   initialFlags,
   initialResolutions,
-  initialLatestDirectionVersion,
+  initialDirectionVersions,
 }: {
   projectId: string;
   initialExtraction: Extraction | null;
   initialExtractedItems: ExtractedItem[];
   initialFlags: Flag[];
   initialResolutions: Resolution[];
-  initialLatestDirectionVersion: DirectionVersion | null;
+  initialDirectionVersions: DirectionVersion[];
 }) {
   const [extraction, setExtraction] = useState(initialExtraction);
   const [items, setItems] = useState(initialExtractedItems);
@@ -64,8 +65,8 @@ export function ExtractionView({
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [directionVersion, setDirectionVersion] = useState(
-    initialLatestDirectionVersion,
+  const [directionVersions, setDirectionVersions] = useState(
+    initialDirectionVersions,
   );
   const [approving, setApproving] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
@@ -151,7 +152,10 @@ export function ExtractionView({
       return;
     }
 
-    setDirectionVersion(data.direction_version);
+    setDirectionVersions((prev) => [
+      data.direction_version as DirectionVersion,
+      ...prev,
+    ]);
   }
 
   const itemsByCategory = CATEGORY_ORDER.map((category) => ({
@@ -160,103 +164,105 @@ export function ExtractionView({
   }));
 
   return (
-    <section className="mx-auto max-w-2xl px-4 pb-16">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Extraction</h2>
-        <button
-          type="button"
-          onClick={handleRun}
-          disabled={running}
-          className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {running ? "Running extraction..." : "Run extraction"}
-        </button>
-      </div>
-
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-
-      {!extraction && !running && (
-        <p className="text-sm text-neutral-500">
-          No extraction has been run yet.
-        </p>
-      )}
-
-      {extraction && (
-        <p className="mb-6 text-xs text-neutral-400">
-          Last run {new Date(extraction.created_at).toLocaleString()} against{" "}
-          {extraction.source_item_ids.length} source item
-          {extraction.source_item_ids.length === 1 ? "" : "s"}.
-        </p>
-      )}
-
-      {flags.length > 0 && (
-        <div className="mb-8">
-          <h3 className="mb-3 text-sm font-medium text-neutral-600">
-            Flags ({flags.length})
-          </h3>
-          <ul className="flex flex-col gap-3">
-            {flags.map((flag) => (
-              <FlagRow
-                key={flag.id}
-                flag={flag}
-                resolution={resolutions[flag.id] ?? null}
-                onResolve={handleResolve}
-              />
-            ))}
-          </ul>
+    <>
+      <section className="mx-auto max-w-2xl px-4 pb-16">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Extraction</h2>
+          <button
+            type="button"
+            onClick={handleRun}
+            disabled={running}
+            className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {running ? "Running extraction..." : "Run extraction"}
+          </button>
         </div>
-      )}
 
-      {items.length > 0 && (
-        <div className="mb-10 flex flex-col gap-6">
-          {itemsByCategory
-            .filter((group) => group.items.length > 0)
-            .map((group) => (
-              <div key={group.category}>
-                <h3 className="mb-2 text-sm font-medium text-neutral-600">
-                  {CATEGORY_LABELS[group.category]}
-                </h3>
-                <ul className="flex flex-col gap-1">
-                  {group.items.map((item) => (
-                    <li
-                      key={item.id}
-                      className="rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-800"
-                    >
-                      {item.content}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-        </div>
-      )}
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      {flags.length > 0 && (
-        <div className="rounded-lg border border-neutral-200 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-neutral-600">Approve</h3>
-            <button
-              type="button"
-              onClick={handleApprove}
-              disabled={approving}
-              className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-            >
-              {approving
-                ? "Approving..."
-                : directionVersion?.status === "approved"
-                  ? "Approve new version"
-                  : "Approve this direction"}
-            </button>
+        {!extraction && !running && (
+          <p className="text-sm text-neutral-500">
+            No extraction has been run yet.
+          </p>
+        )}
+
+        {extraction && (
+          <p className="mb-6 text-xs text-neutral-400">
+            Last run {new Date(extraction.created_at).toLocaleString()}{" "}
+            against {extraction.source_item_ids.length} source item
+            {extraction.source_item_ids.length === 1 ? "" : "s"}.
+          </p>
+        )}
+
+        {flags.length > 0 && (
+          <div className="mb-8">
+            <h3 className="mb-3 text-sm font-medium text-neutral-600">
+              Flags ({flags.length})
+            </h3>
+            <ul className="flex flex-col gap-3">
+              {flags.map((flag) => (
+                <FlagRow
+                  key={flag.id}
+                  flag={flag}
+                  resolution={resolutions[flag.id] ?? null}
+                  onResolve={handleResolve}
+                />
+              ))}
+            </ul>
           </div>
-          {approveError && (
-            <p className="mb-2 text-sm text-red-600">{approveError}</p>
-          )}
-          {directionVersion && directionVersion.status === "approved" && (
-            <DirectionSummary version={directionVersion} />
-          )}
-        </div>
-      )}
-    </section>
+        )}
+
+        {items.length > 0 && (
+          <div className="mb-10 flex flex-col gap-6">
+            {itemsByCategory
+              .filter((group) => group.items.length > 0)
+              .map((group) => (
+                <div key={group.category}>
+                  <h3 className="mb-2 text-sm font-medium text-neutral-600">
+                    {CATEGORY_LABELS[group.category]}
+                  </h3>
+                  <ul className="flex flex-col gap-1">
+                    {group.items.map((item) => (
+                      <li
+                        key={item.id}
+                        className="rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-800"
+                      >
+                        {item.content}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+          </div>
+        )}
+
+        {flags.length > 0 && (
+          <div className="rounded-lg border border-neutral-200 p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-neutral-600">
+                Approve
+              </h3>
+              <button
+                type="button"
+                onClick={handleApprove}
+                disabled={approving}
+                className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+              >
+                {approving
+                  ? "Approving..."
+                  : directionVersions.length > 0
+                    ? "Approve new version"
+                    : "Approve this direction"}
+              </button>
+            </div>
+            {approveError && (
+              <p className="mt-2 text-sm text-red-600">{approveError}</p>
+            )}
+          </div>
+        )}
+      </section>
+      <DirectionView versions={directionVersions} />
+    </>
   );
 }
 
@@ -364,34 +370,5 @@ function FlagRow({
         </div>
       )}
     </li>
-  );
-}
-
-function DirectionSummary({ version }: { version: DirectionVersion }) {
-  return (
-    <div className="flex flex-col gap-2 text-sm">
-      <p className="text-xs text-neutral-400">
-        Version {version.version_number} — approved{" "}
-        {version.approved_at
-          ? new Date(version.approved_at).toLocaleString()
-          : ""}
-      </p>
-      <p className="font-medium text-neutral-800">
-        {version.content.central_idea}
-      </p>
-      <p className="text-neutral-600">{version.content.visual_direction}</p>
-      {version.content.contradictions.length > 0 && (
-        <p className="text-neutral-500">
-          {version.content.contradictions.length} contradiction
-          {version.content.contradictions.length === 1 ? "" : "s"} still open
-        </p>
-      )}
-      {version.content.unresolved_questions.length > 0 && (
-        <p className="text-neutral-500">
-          {version.content.unresolved_questions.length} open question
-          {version.content.unresolved_questions.length === 1 ? "" : "s"}
-        </p>
-      )}
-    </div>
   );
 }

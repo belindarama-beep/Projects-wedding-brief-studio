@@ -84,13 +84,19 @@ export type DirectionVersionContent = {
   budget_implications: string;
 };
 
+export type DirectionDiff = {
+  is_directional_shift: boolean;
+  summary: string;
+  changes: { area: string; before: string; after: string }[];
+};
+
 export type DirectionVersion = {
   id: string;
   project_id: string;
   version_number: number;
   content: DirectionVersionContent;
   status: DirectionStatus;
-  diff_from_previous: unknown;
+  diff_from_previous: DirectionDiff | null;
   created_at: string;
   approved_at: string | null;
 };

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wedding Brief Studio — Brand Identity Guidelines v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Beau+Rivage&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html,body { background: #DAD5C9; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 96px;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  /* ---------- switcher ---------- */
+  .switcher {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    max-width: 700px;
+    margin: 24px auto 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #DAD5C9;
+    padding: 10px 0;
+  }
+  .switcher button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border: 1px solid rgba(32,26,20,.3);
+    background: transparent;
+    color: #201A14;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .switcher button.active { background: #201A14; color: #EDE9E1; border-color: #201A14; }
+  .switcher .cap { font-size: 10px; color: rgba(32,26,20,.5); align-self: center; margin-right: 4px; }
+
+  /* ---------- palette tokens — the four approved presets ---------- */
+  .wrap.preset-terracotta {
+    --panel1: #432430; --panel2: #2A3548;
+    --soft: #CEB3AB; --accent: #E8AC97; --support: #E8AC97; --deepest: #0F0807; --ice: #CEB3AB;
+    --preset-name: "Terracotta & Architecture";
+  }
+  .wrap.preset-rose {
+    --panel1: #470020; --panel2: #8D3E7C;
+    --soft: #FFF2C5; --accent: #24403A; --support: #24403A; --deepest: #470020; --ice: #FFF2C5;
+    --preset-name: "Ancient Rose";
+  }
+  .wrap.preset-fig {
+    --panel1: #4f364b; --panel2: #0b0b09;
+    --soft: #cabad7; --accent: #db3e1d; --support: #db3e1d; --deepest: #0b0b09; --ice: #cabad7;
+    --preset-name: "Fig";
+  }
+  .wrap.preset-lilac {
+    --panel1: #785768; --panel2: #1a0811;
+    --soft: #DADBBC; --accent: #9E929E; --support: #6C8367; --deepest: #1a0811; --ice: #DADBBC;
+    --preset-name: "Lilac & Sage";
+  }
+
+  .wrap { display: flex; flex-direction: column; align-items: center; }
+
+  /* ---------- page shell ---------- */
+  .page {
+    position: relative;
+    width: 700px;
+    min-height: 990px;
+    background: #EDE9E1;
+    color: #201A14;
+    padding: 60px 54px 84px;
+    margin-bottom: 40px;
+    box-shadow: 0 40px 80px rgba(20,15,10,0.28), 0 4px 12px rgba(20,15,10,0.15);
+    overflow: hidden;
+  }
+  .eyebrow-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid rgba(32,26,20,.25);
+    padding-bottom: 12px; margin-bottom: 40px;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--panel1, #201A14);
+  }
+  .page-num { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: rgba(32,26,20,.45); }
+
+  .headline {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 29px; line-height: 1.28;
+    max-width: 480px; margin-bottom: 22px; color: #201A14;
+  }
+  .body-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 14.5px; line-height: 1.75; max-width: 460px; margin-bottom: 16px; color: #302A22; }
+  .body-text b { color: var(--panel1, #201A14); }
+
+  .hand-note {
+    font-family: 'Beau Rivage', cursive; font-size: 32px; color: var(--panel1, #201A14);
+    margin-top: 6px; line-height: 1.3;
+  }
+
+  .footer {
+    position: absolute; left: 54px; right: 54px; bottom: 34px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: .04em;
+    color: rgba(32,26,20,.45); border-top: 1px solid rgba(32,26,20,.15); padding-top: 10px;
+    display: flex; justify-content: space-between;
+  }
+
+  .callout {
+    background: #fff; border: 1px solid rgba(32,26,20,.16); border-radius: 16px;
+    padding: 18px 20px; max-width: 270px; transform: rotate(-1.1deg);
+    box-shadow: 0 8px 18px rgba(20,15,10,.08);
+  }
+  .callout.tilt-r { transform: rotate(1.2deg); }
+  .callout-eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--panel1, #201A14); margin-bottom: 6px;
+  }
+  .callout-body { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; line-height: 1.6; color: #302A22; }
+  .callout-row { display: flex; gap: 20px; margin: 8px 0 28px; }
+
+  .dome-swatch {
+    width: 92px; height: 116px; border-radius: 50% 50% 6px 6px;
+    display: flex; align-items: flex-end; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #fff; padding-bottom: 8px;
+    text-align: center;
+  }
+  .swatch-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #302A22; text-align: center; margin-top: 8px; }
+  .swatch-hex { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: rgba(32,26,20,.5); text-align: center; }
+
+  .palette-card { border: 1px solid rgba(32,26,20,.18); border-radius: 18px; padding: 20px 22px; margin-bottom: 18px; display: flex; gap: 20px; align-items: center; }
+  .palette-name { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .palette-sub { font-family: 'IBM Plex Sans', sans-serif; font-size: 11.5px; color: rgba(32,26,20,.6); margin-bottom: 12px; }
+  .swatch-row { display: flex; gap: 8px; }
+  .sw { width: 32px; height: 42px; border-radius: 4px; }
+
+  /* mini depth-arch: the presence proof, shown once per palette-card */
+  .mini-stack { position: relative; width: 92px; height: 82px; flex-shrink: 0; }
+  .mini-arch { position: absolute; bottom: 0; border-radius: 999px 999px 0 0; }
+  .mini-back  { width: 54px; height: 68px; left: 0; }
+  .mini-mid   { width: 42px; height: 56px; left: 24px; }
+  .mini-front { width: 30px; height: 42px; left: 62px; }
+  .mini-dot   { position: absolute; bottom: 42px; left: 52px; width: 13px; height: 13px; border-radius: 50%; }
+
+  /* cover */
+  .arch-panel {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 39%;
+    background: radial-gradient(140% 90% at 85% 100%, rgba(0,0,0,.18), transparent 60%),
+                linear-gradient(165deg, var(--panel1), var(--panel2));
+    border-radius: 0 140px 140px 0;
+    padding: 54px 34px 0 44px;
+  }
+  .cover-eyebrow { font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.16em; color: rgba(255,255,255,.75); text-transform:uppercase; }
+  .cover-word { font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:34px; color:#fff; line-height:1.15; margin-top:18px; }
+  .cover-right { position:absolute; left: 42%; right: 44px; top: 64px; bottom: 60px; }
+  .cover-sub { font-family:'IBM Plex Sans', sans-serif; font-size: 14px; line-height:1.7; color:#302A22; max-width: 300px; margin-top: 10px; }
+  .cover-arch-shape {
+    width: 190px; height: 240px; border-radius: 95px 95px 0 0;
+    background: var(--soft); margin: 40px 0 22px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.16);
+  }
+  .cover-bar { display:flex; height: 22px; border-radius: 4px; overflow:hidden; margin-top: 40px; width: 260px; }
+  .cover-bar span { flex: 1; }
+  .cover-meta { font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: rgba(32,26,20,.5); margin-top: 30px; letter-spacing: .05em; }
+
+  /* type specimen */
+  .spec-block { border: 1px solid rgba(32,26,20,.16); border-radius: 14px; padding: 22px 24px; margin-bottom: 18px; }
+  .spec-label { font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.1em; text-transform:uppercase; color: rgba(32,26,20,.5); margin-bottom: 10px; }
+
+  /* placement diagrams */
+  .mini-page { width: 150px; height: 200px; border: 1px solid rgba(32,26,20,.25); border-radius: 6px; background:#fff; position: relative; padding: 10px; }
+  .mini-row { display:flex; gap: 26px; margin: 10px 0 30px; }
+  .mini-cap { font-family:'IBM Plex Mono', monospace; font-size: 10.5px; text-align:center; margin-top:10px; color:#302A22; }
+  .mini-mark { position:absolute; font-family:'IBM Plex Mono', monospace; font-size: 7.5px; background: var(--panel1); color:#fff; padding:2px 5px; border-radius: 4px; }
+  .mini-line { position:absolute; left:10px; right:10px; height:1px; background: rgba(32,26,20,.2); }
+
+  /* document family cards */
+  .stack { position: relative; height: 300px; margin: 20px 0 30px 40px; }
+  .stack-card {
+    position: absolute; width: 240px; height: 260px; border-radius: 14px;
+    background: #fff; border: 1px solid rgba(32,26,20,.18); box-shadow: 0 12px 24px rgba(20,15,10,.12);
+    padding: 18px;
+  }
+  .stack-card .tag { font-family:'IBM Plex Mono', monospace; font-weight:600; font-size: 13px; }
+  .stack-card .rule { width: 60%; height: 1px; background: rgba(32,26,20,.2); margin: 10px 0; }
+  .stack-card .rule2 { width: 40%; }
+
+  /* list styling */
+  ul.plain { list-style: none; max-width: 470px; }
+  ul.plain li { position: relative; padding-left: 20px; margin-bottom: 14px; font-size: 13.5px; line-height: 1.6; color: #302A22; }
+  ul.plain li::before { content: ""; position:absolute; left:0; top:6px; width:8px; height:8px; border-radius: 50% 50% 0 0; background: var(--panel1); }
+
+  .dodont { display:flex; gap: 20px; margin-top: 10px; }
+  .dodont-col { flex:1; border-radius: 14px; padding: 16px 18px; }
+  .dodont-col.do { background: rgba(232,172,151,.16); border:1px solid rgba(32,26,20,.12); }
+  .dodont-col.dont { background: rgba(32,26,20,.05); border:1px solid rgba(32,26,20,.12); }
+  .dodont-title { font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:.08em; text-transform:uppercase; margin-bottom: 8px; }
+  .dodont-col p { font-size: 12.5px; line-height:1.55; margin-bottom: 8px; color:#302A22; }
+
+  .signoff-block { border: 1px solid rgba(32,26,20,.25); border-radius: 16px; padding: 26px 28px; margin-top: 30px; max-width: 500px; }
+  .signoff-row { display:flex; justify-content:space-between; margin-bottom: 14px; font-family:'IBM Plex Mono', monospace; font-size: 12px; }
+  .signoff-row span:last-child { color: rgba(32,26,20,.55); }
+</style>
+</head>
+<body>
+
+  <div class="switcher">
+    <span class="cap">Preset —</span>
+    <button class="active" onclick="setPreset('preset-terracotta', this)">Terracotta &amp; Architecture</button>
+    <button onclick="setPreset('preset-rose', this)">Ancient Rose</button>
+    <button onclick="setPreset('preset-fig', this)">Fig</button>
+    <button onclick="setPreset('preset-lilac', this)">Lilac &amp; Sage</button>
+  </div>
+
+  <div class="wrap preset-terracotta" id="wrap">
+
+    <!-- PAGE 1 — COVER -->
+    <div class="page">
+      <div class="arch-panel">
+        <div class="cover-eyebrow">Brand identity guidelines</div>
+        <div class="cover-word">WEDDING<br>BRIEF<br>STUDIO</div>
+      </div>
+      <div class="cover-right">
+        <div class="eyebrow" style="border:none; padding:0;">Colour, type &amp; layout system</div>
+        <div class="cover-arch-shape"></div>
+        <div class="cover-sub">One structural layout per document, skinned by whichever of four palette presets a project resolves to. This guide sets the rules so every document — client-facing, supplier-facing, or in-app — reads as one studio.</div>
+        <div class="cover-bar">
+          <span style="background:var(--panel1)"></span>
+          <span style="background:var(--panel2)"></span>
+          <span style="background:var(--deepest)"></span>
+          <span style="background:var(--soft)"></span>
+        </div>
+        <div class="cover-meta">VERSION 2.0 &nbsp;·&nbsp; AUGUST 2026<br>Toggle presets above — same layout, live tokens.</div>
+      </div>
+      <div class="footer"><span>Wedding Brief Studio</span><span>Brand Identity Guidelines</span></div>
+    </div>
+
+    <!-- PAGE 2 — FOUNDATION -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">01 / Foundation</span><span class="page-num">Page 02</span></div>
+      <div class="headline">The document proves the understanding happened.</div>
+      <div class="body-text">The couple's real desire was never a beautiful document — it's the feeling of being <b>understood</b>. The document is just the evidence that understanding took place. The planner is who delivers that feeling and gets the professional credit for it. Every design decision in this system exists to make that proof land, with a fraction of the effort it currently takes to produce.</div>
+      <div class="body-text">That means the brand has to hold two registers at once: warm enough to feel personal to a couple, disciplined enough to feel dependable to a planner running several weddings at once.</div>
+      <div class="callout-row">
+        <div class="callout">
+          <div class="callout-eyebrow">Who it's for</div>
+          <div class="callout-body">Independent Australian wedding planners — capable, already using Canva or client decks, losing time to interpretation and rebuilding polish from scratch.</div>
+        </div>
+        <div class="callout tilt-r">
+          <div class="callout-eyebrow">Who it's not for</div>
+          <div class="callout-body">Large, design-led luxury studios who treat creative interpretation as their own proprietary skill — not a problem they want solved for them.</div>
+        </div>
+      </div>
+      <div class="hand-note">not a design tool. a trust machine.</div>
+      <div class="footer"><span>Foundation</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 3 — THE MARK -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">02 / The Mark</span><span class="page-num">Page 03</span></div>
+      <div class="headline">One arch, used everywhere — never the studio's name on a planner's document.</div>
+      <div class="body-text">The curved arch is the one recurring shape across the brand: the panel edge on every document page, the dome of a palette swatch, the card shape in the app. It's what makes a Terracotta document and a Fig document still recognisably the same studio.</div>
+      <div class="body-text">But the printed and exported documents go out under the <b>planner's own business name</b>, not "Wedding Brief Studio." The studio's identity lives in the app chrome only. Every document needs a planner mark slot — logo image if supplied, gracefully falling back to a styled text wordmark if not.</div>
+      <div class="mini-row">
+        <div>
+          <div class="mini-page">
+            <div class="mini-mark" style="top:10px; left:10px;">[MARK]</div>
+            <div class="mini-line" style="top:70px;"></div>
+            <div class="mini-line" style="top:80px; right:60px;"></div>
+          </div>
+          <div class="mini-cap">Cover<br><span style="color:rgba(32,26,20,.5); font-family:'IBM Plex Sans'; font-size:10.5px;">small, quiet — paired with the eyebrow</span></div>
+        </div>
+        <div>
+          <div class="mini-page">
+            <div class="mini-line" style="top:14px;"></div>
+            <div class="mini-mark" style="top:6px; right:10px;">[MARK]</div>
+            <div class="mini-line" style="top:60px;"></div>
+            <div class="mini-line" style="top:100px;"></div>
+          </div>
+          <div class="mini-cap">Interior pages<br><span style="color:rgba(32,26,20,.5); font-family:'IBM Plex Sans'; font-size:10.5px;">mirrored against the section eyebrow, every page</span></div>
+        </div>
+        <div>
+          <div class="mini-page">
+            <div class="mini-line" style="top:150px;"></div>
+            <div class="mini-mark" style="bottom:14px; left:10px; background:var(--deepest);">[MARK + CONTACT]</div>
+          </div>
+          <div class="mini-cap">Sign-off<br><span style="color:rgba(32,26,20,.5); font-family:'IBM Plex Sans'; font-size:10.5px;">letterhead weight — name, phone, email, site</span></div>
+        </div>
+      </div>
+      <div class="hand-note">their name on the front. ours, nowhere.</div>
+      <div class="footer"><span>The Mark</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 4 — COLOUR SYSTEM -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">03 / Colour System</span><span class="page-num">Page 04</span></div>
+      <div class="headline">One dark anchor. One softened counterpart. One accent that gives it teeth.</div>
+      <div class="body-text">Four fixed presets, not an open-ended design system. Every document is one structural layout, skinned by whichever preset a project resolves to. <b>The interest comes from dark/light contrast, not any single colour</b> — every preset here carries a genuine near-black or near-plum anchor, checked against a real reference image rather than trusted from an automated colour extraction. Two earlier presets were cut for failing exactly this test.</div>
+
+      <div class="palette-card">
+        <div class="mini-stack">
+          <div class="mini-arch mini-back" style="background:#2A3548;"></div>
+          <div class="mini-arch mini-mid" style="background:linear-gradient(155deg,#432430,#0F0807);"></div>
+          <div class="mini-arch mini-front" style="background:#CEB3AB;"></div>
+          <div class="mini-dot" style="background:#E8AC97;"></div>
+        </div>
+        <div>
+          <div class="palette-name">Terracotta &amp; Architecture</div>
+          <div class="palette-sub">Deep plum · deep navy · near-black · warm neutral · peach</div>
+          <div class="swatch-row">
+            <div class="sw" style="background:#432430;"></div>
+            <div class="sw" style="background:#2A3548;"></div>
+            <div class="sw" style="background:#0F0807;"></div>
+            <div class="sw" style="background:#CEB3AB;"></div>
+            <div class="sw" style="background:#E8AC97;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-card">
+        <div class="mini-stack">
+          <div class="mini-arch mini-back" style="background:#8D3E7C;"></div>
+          <div class="mini-arch mini-mid" style="background:linear-gradient(155deg,#470020,#8D3E7C);"></div>
+          <div class="mini-arch mini-front" style="background:#FFF2C5;"></div>
+          <div class="mini-dot" style="background:#24403A;"></div>
+        </div>
+        <div>
+          <div class="palette-name">Ancient Rose</div>
+          <div class="palette-sub">Deep plum · ancient rose · teal · soft butter</div>
+          <div class="swatch-row">
+            <div class="sw" style="background:#470020;"></div>
+            <div class="sw" style="background:#8D3E7C;"></div>
+            <div class="sw" style="background:#24403A;"></div>
+            <div class="sw" style="background:#FFF2C5;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-card">
+        <div class="mini-stack">
+          <div class="mini-arch mini-back" style="background:#4f364b;"></div>
+          <div class="mini-arch mini-mid" style="background:linear-gradient(155deg,#4f364b,#0b0b09);"></div>
+          <div class="mini-arch mini-front" style="background:#cabad7;"></div>
+          <div class="mini-dot" style="background:#db3e1d;"></div>
+        </div>
+        <div>
+          <div class="palette-name">Fig</div>
+          <div class="palette-sub">Muted plum · near-black · lavender · vivid orange</div>
+          <div class="swatch-row">
+            <div class="sw" style="background:#4f364b;"></div>
+            <div class="sw" style="background:#0b0b09;"></div>
+            <div class="sw" style="background:#cabad7;"></div>
+            <div class="sw" style="background:#db3e1d;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-card">
+        <div class="mini-stack">
+          <div class="mini-arch mini-back" style="background:#6C8367;"></div>
+          <div class="mini-arch mini-mid" style="background:linear-gradient(155deg,#785768,#1a0811);"></div>
+          <div class="mini-arch mini-front" style="background:#DADBBC;"></div>
+          <div class="mini-dot" style="background:#9E929E;"></div>
+        </div>
+        <div>
+          <div class="palette-name">Lilac &amp; Sage</div>
+          <div class="palette-sub">Mauve · near-black · sage · grey-lilac · pale cream</div>
+          <div class="swatch-row">
+            <div class="sw" style="background:#785768;"></div>
+            <div class="sw" style="background:#1a0811;"></div>
+            <div class="sw" style="background:#6C8367;"></div>
+            <div class="sw" style="background:#DADBBC;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer"><span>Colour System</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 5 — COLOUR RULES -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">03 / Colour System — cont.</span><span class="page-num">Page 05</span></div>
+      <div class="headline">Where presets are chosen, and by whom.</div>
+      <ul class="plain">
+        <li>The preset is a <b>planner-controlled, project-level setting</b> — chosen once per wedding in the app, not fiddled with per document.</li>
+        <li>The couple only ever sees the <b>one resolved palette</b>. There is no couple-facing switcher, on any document or screen — the choice is the planner's craft judgement, not the client's toggle.</li>
+        <li>Changing the preset regenerates the Creative Direction and Supplier Brief together, so the two documents never drift apart in palette.</li>
+        <li>A fifth preset is a matter of assigning new hex values to the same handful of tokens — but only once a genuine dark anchor has been confirmed against the real source image, not assumed from an automated colour extraction. Two of the original presets were cut specifically for skipping this check.</li>
+      </ul>
+      <div class="dodont">
+        <div class="dodont-col do">
+          <div class="dodont-title" style="color:var(--panel1);">Do</div>
+          <p>Let the eyebrow, callout border and hand-note all pull from one dark token per preset, so a swap re-skins the whole page at once.</p>
+        </div>
+        <div class="dodont-col dont">
+          <div class="dodont-title" style="color:#7a3030;">Don't</div>
+          <p>Introduce a colour that isn't one of this preset's named token values, even for "just this one section."</p>
+        </div>
+      </div>
+      <div class="hand-note">the planner's call, not the couple's toggle.</div>
+      <div class="footer"><span>Colour System</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 6 — TYPOGRAPHY -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">04 / Typography</span><span class="page-num">Page 06</span></div>
+      <div class="headline">Structure speaks in Mono. Warmth speaks in Sans. The signature speaks once, by hand.</div>
+      <div class="spec-block">
+        <div class="spec-label">IBM Plex Mono — structure &amp; labels</div>
+        <div style="font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:600;">EYEBROWS · HEADLINES · FOOTERS</div>
+        <div class="body-text" style="margin-top:10px; margin-bottom:0;">Every eyebrow, page number, section label and headline runs in Plex Mono. It's what gives the documents their considered, almost architectural feel against the softness of the colour system.</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">IBM Plex Sans — body copy</div>
+        <div style="font-family:'IBM Plex Sans', sans-serif; font-size:15px;">The reading experience — direction narratives, supplier notes, open questions.</div>
+        <div class="body-text" style="margin-top:10px; margin-bottom:0;">Everything a couple or supplier actually sits and reads runs in Plex Sans. Clean and humanist, never competing with the structural Mono around it.</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-label">Beau Rivage — the handwritten accent</div>
+        <div class="hand-note" style="font-size:36px; margin-top:0;">feels like them, not like anyone else.</div>
+        <div class="body-text" style="margin-top:12px; margin-bottom:0;">Open-licensed, genuinely calligraphic — not a casual marker font. Used sparingly: <b>once per page, maximum</b>, as a recurring signature device rather than decoration. If it shows up twice on a page, it's stopped meaning anything.</div>
+      </div>
+      <div class="footer"><span>Typography</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 7 — LAYOUT PRINCIPLES -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">05 / Layout Principles</span><span class="page-num">Page 07</span></div>
+      <div class="headline">Interrupted design — offbeat on purpose, not polished into anonymity.</div>
+      <div class="body-text">The working name for the layout language: less standard AI-luxury, more intentionally asymmetric. Elements get pushed to the edges. Text boxes carry the emphasis, not centred hero type.</div>
+      <ul class="plain">
+        <li><b>Left-aligned, asymmetric</b> — never centred compositions. The eye should land somewhere specific, not in the middle.</li>
+        <li><b>Arch-edged panel</b>, not a hard rectangle — every dark colour block echoes the brand's curved arch shape.</li>
+        <li><b>Depth through layering, not through square footage</b> — presence comes from a stack of shapes with real shadow between them, contained to a defined zone. Never a full-bleed dark background standing in for drama; that's expensive to print and it isn't what's actually doing the work.</li>
+        <li><b>Hairline borders</b> throughout — thin enough to organise, never heavy enough to feel like a form.</li>
+        <li><b>Rounded callout boxes with a slight rotation</b> — a degree or two off true, so nothing reads as machine-generated.</li>
+        <li><b>One handwritten marginal note per page</b> — the Beau Rivage signature device, never more than once.</li>
+      </ul>
+      <div class="dodont">
+        <div class="dodont-col do">
+          <div class="dodont-title" style="color:var(--panel1);">Do</div>
+          <p>Let a callout sit slightly off-grid and rotated. Push the hand-note into a margin, not a centred caption.</p>
+        </div>
+        <div class="dodont-col dont">
+          <div class="dodont-title" style="color:#7a3030;">Don't</div>
+          <p>Centre a headline "for balance," or square off a panel edge to make it easier to lay out.</p>
+        </div>
+      </div>
+      <div class="footer"><span>Layout Principles</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 8 — DOCUMENT FAMILY -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">06 / The Document Family</span><span class="page-num">Page 08</span></div>
+      <div class="headline">One palette, three views.</div>
+      <div class="body-text">Client-facing, supplier-facing and internal-working documents can shift emphasis and tone while staying visibly related — same tokens, same arch, same hand-note device, different register. The real design task was never 8–12 separate documents; it's two structural layouts (Creative Direction, Supplier Brief), each skinned by the four presets above.</div>
+      <div class="stack">
+        <div class="stack-card" style="left:0; top:30px; transform:rotate(-4deg); background: var(--panel1); color:#fff;">
+          <div class="tag">CLIENT DIRECTION</div>
+          <div class="rule" style="background:rgba(255,255,255,.3);"></div>
+          <div class="rule rule2" style="background:rgba(255,255,255,.3);"></div>
+        </div>
+        <div class="stack-card" style="left:40px; top:10px; transform:rotate(-1deg); background: var(--soft);">
+          <div class="tag" style="color:#302A22;">SUPPLIER BRIEF</div>
+          <div class="rule"></div><div class="rule rule2"></div>
+        </div>
+        <div class="stack-card" style="left:80px; top:-14px; transform:rotate(2.5deg); background:#fff;">
+          <div class="tag" style="color:#302A22;">INTERNAL WORKING BRIEF</div>
+          <div class="rule"></div><div class="rule rule2"></div>
+        </div>
+      </div>
+      <div class="body-text" style="margin-top:10px;">The Early Direction Snapshot reuses the Creative Direction layout verbatim, thinner and marked as a working first impression. The couple-facing Update view is the one true screen (not print layout) in the family — same tokens, calm and single-purpose.</div>
+      <div class="footer"><span>Document Family</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+    <!-- PAGE 9 — VOICE, TONE & SIGN-OFF -->
+    <div class="page">
+      <div class="eyebrow-row"><span class="eyebrow">07 / Voice, Tone &amp; Sign-off</span><span class="page-num">Page 09</span></div>
+      <div class="headline">Speak like the planner, not like the software.</div>
+      <div class="body-text">Every document is written as if the planner is speaking directly to the couple or supplier — warm, plain-language, specific to this wedding. Contradictions get surfaced honestly ("relaxed" sitting against "very luxurious") rather than smoothed into generic safety. A couple should feel <b>read</b>, not processed.</div>
+      <div class="dodont">
+        <div class="dodont-col do">
+          <div class="dodont-title" style="color:var(--panel1);">Do</div>
+          <p>Name the open question plainly: "We haven't landed on the linen colour yet."</p>
+          <p>Write budget tiers as real trade-offs, not upsell copy.</p>
+        </div>
+        <div class="dodont-col dont">
+          <div class="dodont-title" style="color:#7a3030;">Don't</div>
+          <p>Paper over a genuine contradiction with vague, safe language.</p>
+          <p>Let the tone drift toward generic "luxury AI" copywriting.</p>
+        </div>
+      </div>
+      <div class="signoff-block">
+        <div class="signoff-row"><span>Document</span><span>Brand Identity Guidelines</span></div>
+        <div class="signoff-row"><span>Version</span><span>2.0</span></div>
+        <div class="signoff-row"><span>Status</span><span>Approved — working reference</span></div>
+        <div class="signoff-row"><span>Date</span><span>August 2026</span></div>
+      </div>
+      <div class="hand-note">this is what "us" looks like on paper.</div>
+      <div class="footer"><span>Voice, Tone &amp; Sign-off</span><span>Wedding Brief Studio</span></div>
+    </div>
+
+  </div>
+
+<script>
+function setPreset(cls, btn) {
+  document.getElementById('wrap').className = 'wrap ' + cls;
+  document.querySelectorAll('.switcher button').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

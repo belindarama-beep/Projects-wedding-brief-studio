@@ -51,7 +51,19 @@ export function ExtractionView({
     setRunning(false);
 
     if (error) {
-      setError(error.message);
+      // supabase-js only gives a generic message for non-2xx responses;
+      // the function's actual {error} body is on error.context (a Response).
+      const context = (error as { context?: Response }).context;
+      if (context) {
+        try {
+          const body = await context.clone().json();
+          setError(body.error ?? error.message);
+        } catch {
+          setError(`${error.message} (status ${context.status})`);
+        }
+      } else {
+        setError(error.message);
+      }
       return;
     }
     if (data?.error) {

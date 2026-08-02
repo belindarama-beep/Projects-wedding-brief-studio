@@ -52,5 +52,45 @@ export type Flag = {
   description: string;
   evidence: string | null;
   source_item_ids: string[];
+  suggested_resolutions: string[];
   created_at: string;
+};
+
+export type ResolutionMethod = "pill" | "free_text" | "kept_open";
+
+export type Resolution = {
+  id: string;
+  flag_id: string;
+  project_id: string;
+  method: ResolutionMethod;
+  content: string | null;
+  resolved_by: string;
+  resolved_at: string;
+};
+
+export type DirectionStatus = "draft" | "approved";
+
+export type DirectionVersionContent = {
+  central_idea: string;
+  visual_direction: string;
+  colour_material_direction: string;
+  priority_moments: string[];
+  what_to_avoid: string[];
+  fixed_decisions: string[];
+  flexible_decisions: string[];
+  planner_notes?: string[];
+  contradictions: { topic: string; description: string }[];
+  unresolved_questions: { question: string; context: string }[];
+  budget_implications: string;
+};
+
+export type DirectionVersion = {
+  id: string;
+  project_id: string;
+  version_number: number;
+  content: DirectionVersionContent;
+  status: DirectionStatus;
+  diff_from_previous: unknown;
+  created_at: string;
+  approved_at: string | null;
 };

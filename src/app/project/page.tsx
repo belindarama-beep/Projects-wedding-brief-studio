@@ -2,7 +2,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CollectView } from "@/components/CollectView";
 import { ExtractionView } from "@/components/ExtractionView";
-import type { Extraction, ExtractedItem, Flag, Source } from "@/lib/types";
+import type {
+  DirectionVersion,
+  Extraction,
+  ExtractedItem,
+  Flag,
+  Resolution,
+  Source,
+} from "@/lib/types";
 
 export default async function ProjectPage() {
   const supabase = await createClient();
@@ -78,6 +85,7 @@ export default async function ProjectPage() {
 
   let extractedItems: ExtractedItem[] = [];
   let flags: Flag[] = [];
+  let resolutions: Resolution[] = [];
 
   if (latestExtraction) {
     const [{ data: items }, { data: flagRows }] = await Promise.all([
@@ -90,13 +98,34 @@ export default async function ProjectPage() {
       supabase
         .from("flags")
         .select(
-          "id, extraction_id, project_id, type, description, evidence, source_item_ids, created_at",
+          "id, extraction_id, project_id, type, description, evidence, source_item_ids, suggested_resolutions, created_at",
         )
         .eq("extraction_id", latestExtraction.id),
     ]);
     extractedItems = (items ?? []) as ExtractedItem[];
     flags = (flagRows ?? []) as Flag[];
+
+    if (flags.length > 0) {
+      const { data: resolutionRows } = await supabase
+        .from("resolutions")
+        .select("id, flag_id, project_id, method, content, resolved_by, resolved_at")
+        .in(
+          "flag_id",
+          flags.map((f) => f.id),
+        );
+      resolutions = (resolutionRows ?? []) as Resolution[];
+    }
   }
+
+  const { data: latestDirectionVersion } = await supabase
+    .from("direction_versions")
+    .select(
+      "id, project_id, version_number, content, status, diff_from_previous, created_at, approved_at",
+    )
+    .eq("project_id", project.id)
+    .order("version_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   return (
     <>
@@ -110,6 +139,10 @@ export default async function ProjectPage() {
         initialExtraction={latestExtraction as Extraction | null}
         initialExtractedItems={extractedItems}
         initialFlags={flags}
+        initialResolutions={resolutions}
+        initialLatestDirectionVersion={
+          latestDirectionVersion as DirectionVersion | null
+        }
       />
     </>
   );

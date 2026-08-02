@@ -53,11 +53,24 @@ For the Arden & Theo project, after a direction is approved, the planner can gen
 ```
 I'm building Generate for Wedding Brief Studio — rendering an approved
 direction_versions record into the real nine-page Creative Direction document.
-Read generate-feature-build-brief.md and wedding-brief-studio-brand-guidelines-v2.html
-in this repo for full scope — the guidelines file is the current token source of
-truth (four presets: Terracotta & Architecture, Ancient Rose, Fig, Lilac & Sage).
-If a design/docs folder with that file doesn't exist in the repo yet, ask me
-before proceeding rather than guessing at token values from memory.
+Read the following files in the design/ folder of this repo before writing
+anything:
+
+- generate-feature-build-brief.md — this brief, full scope
+- wedding-brief-studio-brand-guidelines-v2.html — current token source of truth
+  (four presets: Terracotta & Architecture, Ancient Rose, Fig, Lilac & Sage)
+- visual-direction-palette-test.html — working reference implementation of the
+  composition rules (image slots absorbing 1-5 photos, the layered arch-stack
+  depth device, print-conscious containment) — read the actual CSS here, don't
+  infer the rules from prose alone
+- product-concept-and-template-spec.md — the content spec for what goes on each
+  of the nine pages
+- wedding-brief-studio-core-engine-spec.md — the Approved Record field shape
+  (central idea, visual direction, colour/material direction, priority moments,
+  what to avoid, budget tiers) that direction_versions.content needs to map from
+
+If any of these aren't in design/ yet, ask me before proceeding rather than
+guessing at their content from memory.
 
 Before writing any code, check the current repo state and tell me:
 1. Whether the nine-page templates currently work only against static Isla &

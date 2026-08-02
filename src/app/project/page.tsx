@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CollectView } from "@/components/CollectView";
-import type { Source } from "@/lib/types";
+import { ExtractionView } from "@/components/ExtractionView";
+import type { Extraction, ExtractedItem, Flag, Source } from "@/lib/types";
 
 export default async function ProjectPage() {
   const supabase = await createClient();
@@ -67,11 +68,49 @@ export default async function ProjectPage() {
     }
   }
 
+  const { data: latestExtraction } = await supabase
+    .from("extractions")
+    .select("id, project_id, source_item_ids, created_at")
+    .eq("project_id", project.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  let extractedItems: ExtractedItem[] = [];
+  let flags: Flag[] = [];
+
+  if (latestExtraction) {
+    const [{ data: items }, { data: flagRows }] = await Promise.all([
+      supabase
+        .from("extracted_items")
+        .select(
+          "id, extraction_id, project_id, category, content, source_item_ids, created_at",
+        )
+        .eq("extraction_id", latestExtraction.id),
+      supabase
+        .from("flags")
+        .select(
+          "id, extraction_id, project_id, type, description, evidence, source_item_ids, created_at",
+        )
+        .eq("extraction_id", latestExtraction.id),
+    ]);
+    extractedItems = (items ?? []) as ExtractedItem[];
+    flags = (flagRows ?? []) as Flag[];
+  }
+
   return (
-    <CollectView
-      project={project}
-      initialSources={typedSources}
-      initialSignedUrls={signedUrls}
-    />
+    <>
+      <CollectView
+        project={project}
+        initialSources={typedSources}
+        initialSignedUrls={signedUrls}
+      />
+      <ExtractionView
+        projectId={project.id}
+        initialExtraction={latestExtraction as Extraction | null}
+        initialExtractedItems={extractedItems}
+        initialFlags={flags}
+      />
+    </>
   );
 }

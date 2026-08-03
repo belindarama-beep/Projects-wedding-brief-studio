@@ -57,6 +57,13 @@ export function GenerateView({
   }
 
   async function handleGenerate() {
+    if (imageSources.length > 0 && selectedImageIds.length === 0) {
+      const proceed = window.confirm(
+        "No inspiration images are selected. The visual direction pages will render without a photo — continue anyway?",
+      );
+      if (!proceed) return;
+    }
+
     setGenerating(true);
     setError(null);
 
@@ -129,9 +136,20 @@ export function GenerateView({
       </div>
 
       <div className="mb-6">
-        <h3 className="mb-2 text-sm font-medium text-neutral-600">
+        <h3 className="mb-1 text-sm font-medium text-neutral-600">
           Inspiration images for the visual direction pages
         </h3>
+        {imageSources.length > 0 && (
+          <p
+            className={`mb-2 text-xs ${
+              selectedImageIds.length === 0 ? "font-medium text-amber-600" : "text-neutral-400"
+            }`}
+          >
+            {selectedImageIds.length === 0
+              ? "No images selected — the visual direction pages will show no photo."
+              : `${selectedImageIds.length} of ${imageSources.length} selected`}
+          </p>
+        )}
         {imageSources.length === 0 ? (
           <p className="text-sm text-neutral-500">
             No images uploaded yet — add some via Collect to include them.
@@ -144,23 +162,30 @@ export function GenerateView({
               return (
                 <label
                   key={source.id}
-                  className={`relative block h-24 w-24 cursor-pointer overflow-hidden rounded-md border-2 ${
+                  className={`relative block h-24 w-24 cursor-pointer overflow-hidden rounded-md border-2 bg-neutral-100 ${
                     checked ? "border-neutral-900" : "border-transparent"
                   }`}
                 >
                   <input
                     type="checkbox"
-                    className="absolute right-1 top-1 z-10"
+                    className="absolute right-1 top-1 z-10 h-5 w-5"
                     checked={checked}
                     onChange={() => toggleImage(source.id)}
                   />
-                  {url && (
+                  {checked && (
+                    <span className="absolute inset-0 z-[5] bg-neutral-900/20" aria-hidden="true" />
+                  )}
+                  {url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={url}
                       alt="Inspiration"
                       className="h-full w-full object-cover"
                     />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-center text-[10px] text-neutral-400">
+                      Preview unavailable
+                    </span>
                   )}
                 </label>
               );

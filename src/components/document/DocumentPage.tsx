@@ -6,6 +6,7 @@ export function DocumentPage({
   footerLeft,
   footerRight,
   mark,
+  hideHeader = false,
   children,
 }: {
   eyebrow: string;
@@ -13,17 +14,21 @@ export function DocumentPage({
   footerLeft: string;
   footerRight: string;
   mark?: ReactNode;
+  /** Cover uses its own self-contained header (arch panel), never the shared eyebrow row. */
+  hideHeader?: boolean;
   children: ReactNode;
 }) {
   return (
     <section className="wbs-page">
-      <div className="wbs-eyebrow-row">
-        <span className="wbs-eyebrow">{eyebrow}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          {mark}
-          <span className="wbs-page-num">{pageNum}</span>
+      {!hideHeader && (
+        <div className="wbs-eyebrow-row">
+          <span className="wbs-eyebrow">{eyebrow}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            {mark}
+            <span className="wbs-page-num">{pageNum}</span>
+          </div>
         </div>
-      </div>
+      )}
       <div className="wbs-content">{children}</div>
       <div className="wbs-footer">
         <span>{footerLeft}</span>

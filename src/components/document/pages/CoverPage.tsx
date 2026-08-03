@@ -17,16 +17,20 @@ export function CoverPage({ data }: { data: CreativeDirectionDocumentData }) {
 
   return (
     <DocumentPage
+      hideHeader
       eyebrow="Creative Direction"
       pageNum="Page 01"
       footerLeft={project.coupleNames}
       footerRight="Creative Direction"
-      mark={<PlannerMark logoUrl={planner.logoUrl} businessName={planner.businessName} />}
     >
-      <div className="wbs-cover">
-        <div className="wbs-cover-arch">
-          <div className="wbs-cover-eyebrow">Approved creative direction</div>
-          <div className="wbs-cover-word">{project.coupleNames}</div>
+      <div className="wbs-cover-arch">
+        <div className="wbs-cover-eyebrow">Approved creative direction</div>
+        <div className="wbs-cover-word">{project.coupleNames}</div>
+      </div>
+
+      <div className="wbs-cover-right">
+        <div className="wbs-cover-mark-row">
+          <PlannerMark logoUrl={planner.logoUrl} businessName={planner.businessName} />
         </div>
 
         <p className="wbs-cover-sub">{data.direction.content.central_idea}</p>

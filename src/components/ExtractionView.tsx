@@ -117,6 +117,11 @@ export function ExtractionView({
           method,
           content,
           resolved_by: user.id,
+          // Explicit so re-resolving an already-resolved flag actually moves
+          // this forward — upsert only touches columns present in the
+          // payload, and the column's own `default now()` only applies to
+          // the very first insert, not later updates.
+          resolved_at: new Date().toISOString(),
         },
         { onConflict: "flag_id" },
       )

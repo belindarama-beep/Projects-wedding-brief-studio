@@ -243,21 +243,33 @@
 }
 .wbs-section-label:first-child { margin-top: 0; }
 
-/* ---------- cover ---------- */
-.wbs-cover {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-height: 100%;
-}
+/* ---------- cover ----------
+   Cover has no shared eyebrow-row (DocumentPage hideHeader) — the arch panel
+   bleeds edge-to-edge via position:absolute against .wbs-page (its nearest
+   positioned ancestor), same structural pattern as .arch-panel in
+   design/wedding-brief-studio-brand-guidelines-v2.html. No negative margin,
+   so there's nothing for it to visually collide with in DOM/paint order. */
 .wbs-cover-arch {
-  align-self: flex-start;
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 42%;
   background: radial-gradient(140% 90% at 85% 100%, rgba(0, 0, 0, 0.18), transparent 60%),
               linear-gradient(165deg, var(--panel1), var(--panel2));
   border-radius: 0 90px 90px 0;
-  padding: 28px 40px 28px 0;
-  margin: -60px 0 32px -54px;
-  width: 62%;
+  padding: 44px 32px 44px 44px;
+  display: flex;
+  flex-direction: column;
+}
+.wbs-cover-right {
+  position: absolute;
+  left: 46%; right: 54px; top: 60px; bottom: 100px;
+  display: flex;
+  flex-direction: column;
+}
+.wbs-cover-mark-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
 }
 .wbs-cover-eyebrow {
   font-family: var(--font-plex-mono), monospace; font-size: 11px; letter-spacing: 0.16em;
@@ -269,7 +281,7 @@
 }
 .wbs-cover-sub {
   font-family: var(--font-plex-sans), sans-serif; font-size: 14px; line-height: 1.7;
-  color: #302A22; max-width: 420px; margin: 0 0 24px;
+  color: #302A22; max-width: 380px; margin: 0 0 24px;
 }
 .wbs-cover-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 4px 0 24px; width: 240px; }
 .wbs-cover-bar span { flex: 1; }

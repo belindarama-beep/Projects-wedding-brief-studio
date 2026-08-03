@@ -53,6 +53,7 @@ export type Flag = {
   evidence: string | null;
   source_item_ids: string[];
   suggested_resolutions: string[];
+  internal_only: boolean;
   created_at: string;
 };
 
@@ -79,8 +80,11 @@ export type DirectionVersionContent = {
   fixed_decisions: string[];
   flexible_decisions: string[];
   planner_notes?: string[];
-  contradictions: { topic: string; description: string }[];
-  unresolved_questions: { question: string; context: string }[];
+  // flag_id is absent on versions approved before the internal_only
+  // cross-check existed (v4 and earlier for Arden & Theo) — treat missing
+  // as "can't verify against a flag," never as "safe to show."
+  contradictions: { topic: string; description: string; flag_id?: string }[];
+  unresolved_questions: { question: string; context: string; flag_id?: string }[];
   budget_implications: string;
 };
 

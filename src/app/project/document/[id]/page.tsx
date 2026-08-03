@@ -49,6 +49,41 @@ export default async function DocumentPage({
   const typedDirection = direction as DirectionVersion;
   const typedProject = project as Project & { planner_id: string };
 
+  // Referential-integrity cross-check, independent of whatever approve-direction
+  // already did: never render a contradiction/open question whose source flag
+  // is marked internal_only — including flags marked internal_only *after* this
+  // version was approved. A flag_id missing or not found is treated as unsafe,
+  // never as safe by default (older approved versions predate this field).
+  const referencedFlagIds = Array.from(
+    new Set(
+      [
+        ...typedDirection.content.contradictions.map((c) => c.flag_id),
+        ...typedDirection.content.unresolved_questions.map((q) => q.flag_id),
+      ].filter((flagId): flagId is string => !!flagId),
+    ),
+  );
+
+  const safeFlagIds = new Set<string>();
+  if (referencedFlagIds.length > 0) {
+    const { data: flagRows } = await supabase
+      .from("flags")
+      .select("id, internal_only")
+      .in("id", referencedFlagIds);
+    for (const f of (flagRows ?? []) as { id: string; internal_only: boolean }[]) {
+      if (!f.internal_only) safeFlagIds.add(f.id);
+    }
+  }
+
+  const safeDirectionContent = {
+    ...typedDirection.content,
+    contradictions: typedDirection.content.contradictions.filter(
+      (c) => !!c.flag_id && safeFlagIds.has(c.flag_id),
+    ),
+    unresolved_questions: typedDirection.content.unresolved_questions.filter(
+      (q) => !!q.flag_id && safeFlagIds.has(q.flag_id),
+    ),
+  };
+
   const { data: planner } = await supabase
     .from("planners")
     .select("id, business_name, brand_logo_url")
@@ -101,7 +136,7 @@ export default async function DocumentPage({
     direction: {
       versionNumber: typedDirection.version_number,
       approvedAt: typedDirection.approved_at,
-      content: typedDirection.content,
+      content: safeDirectionContent,
     },
     preset: isStylePresetSlug(document.template_preset)
       ? document.template_preset

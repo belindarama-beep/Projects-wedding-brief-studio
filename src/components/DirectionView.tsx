@@ -50,7 +50,10 @@ export function DirectionView({ versions }: { versions: DirectionVersion[] }) {
       <p className="mb-6 text-xs text-neutral-400">
         Version {selected.version_number} — approved{" "}
         {selected.approved_at
-          ? new Date(selected.approved_at).toLocaleString()
+          ? new Date(selected.approved_at).toLocaleString("en-AU", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
           : "not yet"}
       </p>
 

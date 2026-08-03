@@ -193,7 +193,11 @@ export function ExtractionView({
 
         {extraction && (
           <p className="mb-6 text-xs text-neutral-400">
-            Last run {new Date(extraction.created_at).toLocaleString()}{" "}
+            Last run{" "}
+            {new Date(extraction.created_at).toLocaleString("en-AU", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}{" "}
             against {extraction.source_item_ids.length} source item
             {extraction.source_item_ids.length === 1 ? "" : "s"}.
           </p>

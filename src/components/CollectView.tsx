@@ -234,7 +234,10 @@ function SourceRow({
   source: Source;
   signedUrl?: string;
 }) {
-  const timestamp = new Date(source.added_at).toLocaleString();
+  const timestamp = new Date(source.added_at).toLocaleString("en-AU", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 
   return (
     <li className="rounded-lg border border-neutral-200 p-3">

@@ -1,0 +1,337 @@
+/* Creative Direction document — adapted from
+   design/visual-direction-palette-test.html and
+   design/wedding-brief-studio-brand-guidelines-v2.html.
+   Flow layout throughout; position:absolute is reserved for the
+   contained depth-stack, footer and corner marks, matching the reference. */
+
+.wbs-doc {
+  --panel1: #432430;
+  --panel2: #2A3548;
+  --soft: #CEB3AB;
+  --accent: #E8AC97;
+  --deepest: #0F0807;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  font-family: var(--font-plex-sans), sans-serif;
+  color: #201A14;
+  background: #DAD5C9;
+  padding: 40px 16px 96px;
+}
+
+.wbs-page {
+  position: relative;
+  width: 700px;
+  max-width: 100%;
+  min-height: 990px;
+  background: #EDE9E1;
+  color: #201A14;
+  padding: 60px 54px 96px;
+  box-shadow: 0 40px 80px rgba(20, 15, 10, 0.28), 0 4px 12px rgba(20, 15, 10, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.wbs-eyebrow-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(32, 26, 20, 0.25);
+  padding-bottom: 12px;
+  margin-bottom: 36px;
+}
+.wbs-eyebrow {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--panel1);
+}
+.wbs-page-num {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 10.5px;
+  color: rgba(32, 26, 20, 0.45);
+}
+
+.wbs-headline {
+  font-family: var(--font-plex-mono), monospace;
+  font-weight: 600;
+  font-size: 27px;
+  line-height: 1.3;
+  max-width: 480px;
+  margin: 0 0 20px;
+  color: #201A14;
+}
+.wbs-body {
+  font-family: var(--font-plex-sans), sans-serif;
+  font-size: 14.5px;
+  line-height: 1.75;
+  max-width: 480px;
+  margin: 0 0 16px;
+  color: #302A22;
+}
+.wbs-body b, .wbs-body strong { color: var(--panel1); }
+
+.wbs-hand-note {
+  font-family: var(--font-beau-rivage), cursive;
+  font-size: 30px;
+  color: var(--panel1);
+  margin-top: 8px;
+  line-height: 1.3;
+}
+
+.wbs-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wbs-footer {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(32, 26, 20, 0.15);
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: rgba(32, 26, 20, 0.45);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ---------- planner mark ---------- */
+.wbs-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wbs-mark img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+.wbs-mark-wordmark {
+  font-family: var(--font-beau-rivage), cursive;
+  font-size: 24px;
+  color: var(--panel1);
+  line-height: 1;
+}
+
+/* ---------- depth-stack: layered, shadowed arch ---------- */
+.wbs-depth-stack {
+  position: relative;
+  height: 260px;
+  margin: 6px 0 30px;
+  flex-shrink: 0;
+}
+.wbs-depth-arch { position: absolute; border-radius: 999px 999px 0 0; }
+.wbs-arch-back {
+  width: 190px; height: 230px; left: 0; bottom: 0;
+  background: var(--panel2);
+  box-shadow: 0 24px 40px rgba(15, 8, 7, 0.25);
+}
+.wbs-arch-mid {
+  width: 152px; height: 196px; left: 88px; bottom: 0;
+  background: linear-gradient(155deg, var(--panel1), var(--deepest));
+  box-shadow: 0 20px 34px rgba(15, 8, 7, 0.32);
+  position: absolute;
+}
+.wbs-arch-mid::after {
+  content: "";
+  position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.14), transparent 55%);
+}
+.wbs-arch-front {
+  width: 106px; height: 150px; left: 226px; bottom: 0;
+  background: var(--soft);
+  box-shadow: 0 14px 24px rgba(15, 8, 7, 0.18);
+}
+.wbs-arch-accent {
+  position: absolute; left: 196px; bottom: 150px;
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 8px 16px rgba(15, 8, 7, 0.22);
+}
+
+/* ---------- fan-pleat accent — texture, at most once per page ---------- */
+.wbs-fan-accent {
+  position: absolute;
+  width: 84px; height: 64px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ---------- image slots — absorb 1 to ~5 uploaded images ---------- */
+.wbs-image-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 4px 0 28px;
+}
+.wbs-image-row {
+  display: grid;
+  gap: 12px;
+}
+.wbs-image-slot {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 110px;
+  box-shadow: 0 10px 22px rgba(15, 8, 7, 0.16);
+  background: linear-gradient(150deg, var(--panel1), var(--panel2));
+}
+.wbs-image-slot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wbs-image-slot .wbs-image-tag {
+  position: absolute;
+  left: 0; bottom: 0;
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(0deg, rgba(15, 8, 7, 0.55), transparent);
+  padding: 16px 10px 8px;
+  width: 100%;
+}
+
+/* ---------- callout ---------- */
+.wbs-callout {
+  background: #fff;
+  border: 1px solid rgba(32, 26, 20, 0.16);
+  border-radius: 16px;
+  padding: 16px 18px;
+  max-width: 270px;
+  transform: rotate(-1.1deg);
+  box-shadow: 0 8px 18px rgba(20, 15, 10, 0.08);
+}
+.wbs-callout.wbs-tilt-r { transform: rotate(1.2deg); }
+.wbs-callout-eyebrow {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--panel1); margin-bottom: 6px;
+}
+.wbs-callout-body {
+  font-family: var(--font-plex-sans), sans-serif;
+  font-size: 12.5px; line-height: 1.6; color: #302A22;
+}
+.wbs-callout-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 8px 0 28px; }
+
+/* ---------- lists ---------- */
+.wbs-list { list-style: none; max-width: 480px; margin: 0 0 20px; padding: 0; }
+.wbs-list li {
+  position: relative; padding-left: 20px; margin-bottom: 12px;
+  font-size: 13.5px; line-height: 1.6; color: #302A22;
+}
+.wbs-list li::before {
+  content: ""; position: absolute; left: 0; top: 6px;
+  width: 8px; height: 8px; border-radius: 50% 50% 0 0; background: var(--panel1);
+}
+
+.wbs-section-label {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(32, 26, 20, 0.55); margin: 24px 0 10px;
+}
+.wbs-section-label:first-child { margin-top: 0; }
+
+/* ---------- cover ---------- */
+.wbs-cover {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 100%;
+}
+.wbs-cover-arch {
+  align-self: flex-start;
+  background: radial-gradient(140% 90% at 85% 100%, rgba(0, 0, 0, 0.18), transparent 60%),
+              linear-gradient(165deg, var(--panel1), var(--panel2));
+  border-radius: 0 90px 90px 0;
+  padding: 28px 40px 28px 0;
+  margin: -60px 0 32px -54px;
+  width: 62%;
+}
+.wbs-cover-eyebrow {
+  font-family: var(--font-plex-mono), monospace; font-size: 11px; letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.75); text-transform: uppercase;
+}
+.wbs-cover-word {
+  font-family: var(--font-plex-mono), monospace; font-weight: 700; font-size: 30px;
+  color: #fff; line-height: 1.2; margin-top: 14px;
+}
+.wbs-cover-sub {
+  font-family: var(--font-plex-sans), sans-serif; font-size: 14px; line-height: 1.7;
+  color: #302A22; max-width: 420px; margin: 0 0 24px;
+}
+.wbs-cover-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 4px 0 24px; width: 240px; }
+.wbs-cover-bar span { flex: 1; }
+.wbs-cover-meta {
+  font-family: var(--font-plex-mono), monospace; font-size: 10.5px;
+  color: rgba(32, 26, 20, 0.55); letter-spacing: 0.05em; margin-top: auto;
+}
+
+/* ---------- budget tiers ---------- */
+.wbs-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 4px 0 24px;
+}
+.wbs-tier-card {
+  border: 1px solid rgba(32, 26, 20, 0.18);
+  border-radius: 14px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wbs-tier-name {
+  font-family: var(--font-plex-mono), monospace; font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--panel1);
+}
+.wbs-tier-headline {
+  font-family: var(--font-plex-mono), monospace; font-weight: 600; font-size: 15px; line-height: 1.3;
+}
+.wbs-tier-desc { font-size: 12px; line-height: 1.55; color: #302A22; }
+.wbs-tier-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.wbs-tier-list li {
+  font-size: 11.5px; line-height: 1.55; color: #302A22; padding-left: 14px; position: relative; margin-bottom: 4px;
+}
+.wbs-tier-list li::before { content: "–"; position: absolute; left: 0; color: rgba(32,26,20,.4); }
+
+/* ---------- open questions ---------- */
+.wbs-question-card {
+  border: 1px solid rgba(32, 26, 20, 0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.wbs-question-text { font-weight: 600; font-size: 13.5px; margin-bottom: 4px; color: #201A14; }
+.wbs-question-context { font-size: 12.5px; line-height: 1.6; color: #4a4238; }
+
+/* ---------- sign-off ---------- */
+.wbs-signoff-block {
+  border: 1px solid rgba(32, 26, 20, 0.25);
+  border-radius: 16px;
+  padding: 26px 28px;
+  margin-top: 20px;
+  max-width: 520px;
+}
+.wbs-signoff-row {
+  display: flex; justify-content: space-between; gap: 12px;
+  margin-bottom: 12px; font-family: var(--font-plex-mono), monospace; font-size: 12px;
+}
+.wbs-signoff-row span:last-child { color: rgba(32, 26, 20, 0.6); text-align: right; }
+
+@media print {
+  .wbs-doc { background: #fff; padding: 0; gap: 0; }
+  .wbs-page { box-shadow: none; break-after: page; }
+}

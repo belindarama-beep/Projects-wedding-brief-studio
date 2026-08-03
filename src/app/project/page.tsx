@@ -2,11 +2,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CollectView } from "@/components/CollectView";
 import { ExtractionView } from "@/components/ExtractionView";
+import { GenerateView } from "@/components/GenerateView";
 import type {
   DirectionVersion,
   Extraction,
   ExtractedItem,
   Flag,
+  Project,
   Resolution,
   Source,
 } from "@/lib/types";
@@ -24,7 +26,7 @@ export default async function ProjectPage() {
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, couple_names, venue, wedding_date")
+    .select("id, couple_names, venue, wedding_date, style_preset")
     .ilike("couple_names", "Arden & Theo")
     .single();
 
@@ -126,6 +128,7 @@ export default async function ProjectPage() {
     .order("version_number", { ascending: false });
 
   const directionVersions = (directionVersionRows ?? []) as DirectionVersion[];
+  const approvedVersions = directionVersions.filter((v) => v.status === "approved");
 
   return (
     <>
@@ -141,6 +144,12 @@ export default async function ProjectPage() {
         initialFlags={flags}
         initialResolutions={resolutions}
         initialDirectionVersions={directionVersions}
+      />
+      <GenerateView
+        project={project as Project}
+        approvedVersions={approvedVersions}
+        imageSources={imageSources}
+        signedUrls={signedUrls}
       />
     </>
   );

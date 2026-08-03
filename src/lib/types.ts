@@ -100,3 +100,43 @@ export type DirectionVersion = {
   created_at: string;
   approved_at: string | null;
 };
+
+export type Project = {
+  id: string;
+  couple_names: string | null;
+  venue: string | null;
+  wedding_date: string | null;
+  style_preset: string | null;
+};
+
+export type Planner = {
+  id: string;
+  business_name: string | null;
+  brand_logo_url: string | null;
+};
+
+export type DocumentType = "creative_direction" | "supplier_brief";
+
+export type BudgetTier = {
+  headline: string;
+  description: string;
+  whats_included: string[];
+};
+
+export type BudgetTiers = {
+  essential: BudgetTier;
+  elevated: BudgetTier;
+  signature: BudgetTier;
+};
+
+export type DocumentRow = {
+  id: string;
+  project_id: string;
+  direction_version_id: string | null;
+  document_type: DocumentType;
+  template_preset: string | null;
+  selected_image_ids: string[];
+  generated_content: { budget_tiers?: BudgetTiers } | null;
+  file_path: string | null;
+  created_at: string;
+};

@@ -22,21 +22,31 @@ Immediately after Extract produces a new set of flags, automatically identify wh
 
 - **A new, separate step** (new edge function, e.g. `carry-forward-resolutions`, invoked right after `extract-facts` succeeds — not folded into that call) that:
   - Takes the newly created extraction's flags, plus the *previous* extraction's flags that had resolutions.
-  - Asks Claude, with a small text-only prompt (no images — keep this cheap and fast; `extract-facts` already flirted with the 150s function timeout on this project with only 5 images, so this shouldn't ride in the same call or add meaningfully to that budget): for each new flag, does it clearly restate a previously-resolved one? If yes, which, and does anything in the new flag's own evidence suggest the old resolution no longer holds? If no confident match, leave it alone — a new flag that merely touches a similar topic but is a genuinely different question must never be force-matched.
-  - Writes new `resolutions` rows for matched flags, carrying over method + content from the original resolution.
-- **A visible "carried forward" marker** in the Extraction UI (a new column, e.g. `resolutions.carried_forward_from_flag_id`, nullable) so the planner can tell an auto-matched resolution apart from one they just made, and override it with one click if the match is wrong — this is the safety valve for a step that is ultimately an LLM judgment call, not a guarantee.
+  - Asks Claude, with a small text-only prompt (no images — keep this cheap and fast; `extract-facts` is already running close to the 150s function timeout at current source volume, so this must not ride in the same call — see Known limitation below): for each new flag, does it clearly restate a previously-resolved one? If yes, which, and does anything in the new flag's own evidence suggest the old resolution no longer holds? If no confident match, leave it alone — a new flag that merely touches a similar topic but is a genuinely different question must never be force-matched.
+  - Tuned conservatively: high-confidence, near-exact matches only. Optimise for false negatives over false positives — a missed carry-forward just costs one re-resolution; a wrong one silently attaches a planner's decision to a question they were never actually asked. Any uncertainty, or any sign the new flag's evidence conflicts with the old resolution, means leave it open — never adjudicate which one wins.
+  - Writes new `resolutions` rows for matched flags, carrying over `method` + `content` verbatim from the original resolution. `resolved_by` and `resolved_at` are copied unchanged from the original — they record when a human actually decided, and must not be overwritten to imply a reaffirmation that didn't happen. Provenance of the carry-forward itself (which old flag it came from, and when the carry-forward ran) is recorded separately: new nullable columns `carried_forward_from_flag_id` and `carried_at` on `resolutions`.
+- **A visible "carried forward" marker** in the Extraction UI, read off `carried_forward_from_flag_id`/`carried_at`, so the planner can tell an auto-matched resolution apart from one they just made, and override it with one click if the match is wrong.
 - Runs as part of the existing "Run extraction" click (client calls `extract-facts`, then on success calls the new function) — one user action, not a second manual step.
+
+## Known limitation of this approach — not deferred, just named
+
+Because Extract regenerates flags with new ids on every run, this design puts an AI judgement call between a planner's decision and its persistence, on every single future Extract run. Tuning the matcher conservatively (above) manages that risk, but doesn't remove it — it is a structural property of the approach, not a bug to be tuned away. If this ever causes real trouble, the correct fix at that point is stable flag identity across runs (so a flag *is* the same row, not a new one that has to be matched back), not a better matcher. Recorded here so it isn't accidentally forgotten as an implicit tradeoff.
 
 ## Out of scope for this phase
 
 - Not touching `extract-facts`'s core fact-extraction logic, or `approve-direction` at all — once resolution rows exist on the new flags, Approve's existing logic already handles them correctly with no changes.
-- Not solving general flag-identity stability across runs (deduping open flags that are the same question worded differently) — this brief is specifically about carrying forward *resolutions*, not stabilizing flag ids as a whole.
-- Not auto-fixing Arden & Theo's current v8 retroactively — the fix applies going forward. (Separately, and immediately: those 5 flags can just be manually re-resolved right now to unblock — happy to do that today regardless of when this brief gets built.)
+- Not solving general flag-identity stability across runs (deduping open flags that are the same question worded differently) — this brief is specifically about carrying forward *resolutions*, not stabilizing flag ids as a whole. (See Known limitation above — that's the real fix, deliberately not attempted here.)
+- Not auto-fixing Arden & Theo's current v8 retroactively — those 5 flags are being resolved directly through the UI, by the planner, not backfilled by an agent. Resolve is a human-owned stage; an agent re-resolving to unblock would just be the same bug's failure mode (a judgement never actually made by a human, committed to an Approved Record) with extra steps.
 
-## Genuine open questions — worth your judgement
+## Decisions locked in
 
-1. **What if new evidence actually contradicts the old resolution** (e.g. old resolution said "lighter neutral linen," but a new note now says "actually go dark")? Silently carrying the old resolution forward in that case would be worse than the current bug — it would hide a real change. My inclination: the matching step should refuse to carry forward (leave it open for the planner) whenever the new flag's own evidence conflicts with the old resolution's content, rather than trying to adjudicate which one wins. Want me to build it that cautious, or would you rather it always carries forward and just flags the conflict for review instead of leaving it open?
-2. **Provenance on carried-forward resolutions** — should `resolved_by`/`resolved_at` stay as the *original* planner/timestamp (accurate history), or update to reflect that it was reaffirmed on this run? I'd default to preserving the original, since no new decision was actually made — but flag this since it affects what "resolved_at" means elsewhere.
+1. **Conflicting new evidence → leave open, never override.** If a new flag's evidence contradicts an old resolution, that is a material change and belongs in the couple-facing Update cycle, with a real diff — not something a carry-forward step should silently swallow. Open is the correct outcome here, not just the cautious one.
+2. **Provenance stays with the original decision.** `resolved_by`/`resolved_at` are never rewritten by a carry-forward. See Proposed shape above for the separate `carried_forward_from_flag_id` / `carried_at` fields.
+3. **Matching is tuned for precision, not recall.** See Proposed shape above.
+
+## Prerequisite — diagnose the Extract timeout before building this
+
+Reported separately in conversation: both recent `extract-facts` runs on this project's current source volume landed at 143–150s, right at the function's timeout ceiling — this is a real, currently-live reliability problem independent of this brief, and needs its own resolution (likely a faster model or a raised timeout) before or alongside this build, not after it.
 
 ## Success criteria
 

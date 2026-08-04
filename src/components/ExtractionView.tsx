@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { DirectionView } from "@/components/DirectionView";
 import type {
@@ -56,6 +57,7 @@ export function ExtractionView({
   initialResolutions: Resolution[];
   initialDirectionVersions: DirectionVersion[];
 }) {
+  const router = useRouter();
   const [extraction, setExtraction] = useState(initialExtraction);
   const [items, setItems] = useState(initialExtractedItems);
   const [flags, setFlags] = useState(initialFlags);
@@ -161,6 +163,12 @@ export function ExtractionView({
       data.direction_version as DirectionVersion,
       ...prev,
     ]);
+
+    // GenerateView reads its own approvedVersions prop from the server
+    // render of project/page.tsx — it has no other way to learn a new
+    // version was just approved here, so without this it stays stuck
+    // offering to generate from whatever was latest at page load.
+    router.refresh();
   }
 
   const itemsByCategory = CATEGORY_ORDER.map((category) => ({

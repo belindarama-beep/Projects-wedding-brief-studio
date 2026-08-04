@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wedding Brief Studio — Device Framework v2 (Final)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Beau+Rivage&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { background: #DAD5C9; }
+body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 16px 96px; font-family: 'IBM Plex Sans', sans-serif; }
+.intro { width: 100%; max-width: 760px; margin-bottom: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: rgba(32,26,20,.55); }
+.intro span { display:block; margin-top: 4px; font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; letter-spacing: normal; text-transform: none; color: rgba(32,26,20,.7); max-width: 620px; line-height: 1.6; }
+.legend { width: 100%; max-width: 760px; margin-bottom: 30px; border: 1px solid rgba(32,26,20,.18); border-radius: 14px; padding: 20px 24px; background: rgba(255,255,255,.55); }
+.legend-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #201A14; margin-bottom: 12px; }
+.legend-group { margin-bottom: 14px; }
+.legend-group-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+.legend-row { display: flex; gap: 10px; font-size: 12.5px; line-height: 1.6; color: #302A22; margin-bottom: 4px; padding-left: 4px; }
+.legend-row b { font-family: 'IBM Plex Mono', monospace; font-size: 11px; min-width: 120px; flex-shrink: 0; }
+.legend-note { font-size: 12px; line-height: 1.6; color: rgba(32,26,20,.65); margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(32,26,20,.2); }
+
+.wrap { --panel1: #432430; --panel2: #2A3548; --soft: #CEB3AB; --accent: #E8AC97; --deepest: #0F0807; display: flex; flex-direction: column; align-items: center; }
+.page { position: relative; width: 700px; min-height: 900px; background: #EDE9E1; color: #201A14; padding: 60px 54px 84px; margin-bottom: 40px; box-shadow: 0 40px 80px rgba(20,15,10,0.28), 0 4px 12px rgba(20,15,10,0.15); overflow: hidden; }
+.eyebrow-row { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(32,26,20,.25); padding-bottom: 12px; margin-bottom: 36px; position: relative; z-index: 2; }
+.eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--panel1); }
+.page-num { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: rgba(32,26,20,.45); }
+.register-tag { position: absolute; top: 32px; right: 54px; font-family:'IBM Plex Mono', monospace; font-size: 9px; letter-spacing:.08em; text-transform:uppercase; z-index: 3; padding: 3px 9px; border-radius: 999px; }
+.reg-weighted { background: rgba(67,36,48,.12); color: var(--panel1); }
+.reg-gestural { background: rgba(42,53,72,.1); color: var(--panel2); }
+.reg-functional { background: rgba(232,172,151,.25); color: #8a4a30; }
+.headline { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 25px; line-height: 1.3; max-width: 460px; margin-bottom: 18px; position: relative; z-index: 2; }
+.body-text { font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; line-height: 1.7; max-width: 420px; margin-bottom: 14px; color: #302A22; position: relative; z-index: 2; }
+.body-text b { color: var(--panel1); }
+.hand-note { font-family: 'Beau Rivage', cursive; font-size: 28px; color: var(--panel1); margin-top: 6px; position: relative; z-index: 2; }
+.footer { position: absolute; left: 54px; right: 54px; bottom: 34px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: .04em; color: rgba(32,26,20,.45); border-top: 1px solid rgba(32,26,20,.15); padding-top: 10px; display: flex; justify-content: space-between; z-index: 2; }
+
+/* weighted register devices */
+.depth-stack { position: relative; height: 260px; margin: 6px 0 20px; }
+.depth-arch { position: absolute; border-radius: 999px 999px 0 0; }
+.arch-back { width: 190px; height: 230px; left: 0; bottom: 0; background: var(--panel2); box-shadow: 0 22px 36px rgba(15,8,7,.25); }
+.arch-mid { width: 150px; height: 194px; left: 88px; bottom: 0; background: linear-gradient(155deg, var(--panel1), var(--deepest)); box-shadow: 0 18px 30px rgba(15,8,7,.32); }
+.arch-front { width: 104px; height: 148px; left: 228px; bottom: 0; background: var(--soft); box-shadow: 0 12px 20px rgba(15,8,7,.18); }
+.arch-accent-circle { position: absolute; left: 198px; bottom: 148px; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); box-shadow: 0 8px 14px rgba(15,8,7,.22); }
+.arch-mid::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, rgba(255,255,255,.14), transparent 55%); }
+
+.disc-trio { position:relative; height:200px; margin:10px 0 20px; max-width: 440px; }
+.disc-trio .disc { position:absolute; border-radius:50%; box-shadow:0 14px 26px rgba(15,8,7,.2); }
+.disc-hero { width:180px; height:180px; left:0; top:10px; background: var(--panel1); }
+.disc-support { width:108px; height:108px; left:135px; top:0; background: var(--soft); }
+.disc-accent { width:46px; height:46px; left:235px; top:108px; background: var(--accent); box-shadow: none; }
+
+.edge-composition { position:absolute; right: 54px; top: 160px; width: 150px; height: 340px; z-index: 1; pointer-events: none; }
+.edge-panel { position:absolute; right:0; top:0; width:88px; height:320px; background:var(--panel1); border-radius: 70% 6px 6px 70% / 32% 6px 6px 32%; opacity: .96; }
+.edge-square { position:absolute; width:94px; height:112px; right:64px; top:56px; background:var(--panel2); border-radius: 20% 60% 20% 60%; box-shadow:0 13px 22px rgba(15,8,7,.2); }
+.edge-disc { position:absolute; width:104px; height:104px; right:40px; bottom:16px; border-radius:50%; background:var(--accent); box-shadow:0 13px 22px rgba(15,8,7,.2); }
+.edge-rule { position:absolute; width:60px; height:1px; right:100px; top:38px; background:rgba(67,36,48,.4); transform:rotate(-14deg); transform-origin:right; }
+
+/* functional device */
+.colour-rail { display:grid; grid-template-columns:20px 1fr; gap:16px; margin:8px 0 20px; max-width:420px; position:relative; z-index:2; }
+.colour-rail .rail { background:linear-gradient(to bottom,var(--accent) 0 25%,var(--panel1) 25% 54%,var(--panel2) 54% 78%,var(--soft) 78%); border-radius:999px; }
+.rail-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.rail-card { min-height:88px; padding:14px; display:flex; align-items:flex-end; font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.08em; text-transform:uppercase; box-shadow:0 8px 16px rgba(15,8,7,.12); border-radius:12px; }
+
+.callout { background: #fff; border: 1px solid rgba(32,26,20,.16); border-radius: 16px; padding: 14px 16px; max-width: 230px; transform: rotate(-1.1deg); box-shadow: 0 8px 18px rgba(20,15,10,.08); position: relative; z-index: 2; }
+.callout-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--panel1); margin-bottom: 5px; }
+.callout-body { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; line-height: 1.55; color: #302A22; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  Device framework v2 — three registers, seven devices, one decision table
+  <span>Every device below has a specific job. A real document draws from more than one register across its pages — using only one register end to end, in either direction, is itself a flaw: all-weighted gets heavy and expensive to print, all-gestural goes thin across nine pages.</span>
+</div>
+
+<div class="legend">
+  <div class="legend-title">The decision table</div>
+  <div class="legend-group">
+    <div class="legend-group-title" style="color:#432430;">Weighted — mass and shadow, used deliberately</div>
+    <div class="legend-row"><b>Arch stack</b> The primary device. Cover, and the page carrying the central idea — the one moment of full presence.</div>
+    <div class="legend-row"><b>Disc trio</b> A second beat of real weight elsewhere in the document — sparingly, never twice.</div>
+    <div class="legend-row"><b>Edge composition</b> A narrative-heavy page that still needs to carry real weight, geometry pushed to the edge.</div>
+  </div>
+  <div class="legend-group">
+    <div class="legend-group-title" style="color:#2A3548;">Gestural — precision instead of mass, almost no ink</div>
+    <div class="legend-row"><b>Fine-line arch</b> A quieter page that still needs the brand mark, not just any device.</div>
+    <div class="legend-row"><b>Ink-sweep circle</b> One more beat of variety on a light page — rhythm from the dots, not a second line.</div>
+    <div class="legend-row"><b>Gestural sprig</b> A small sign of craft in a margin — a gesture toward florals, never a specific arrangement.</div>
+  </div>
+  <div class="legend-group">
+    <div class="legend-group-title" style="color:#8a4a30;">Functional — does content work, not just decoration</div>
+    <div class="legend-row"><b>Colour rail</b> Any page naming several distinct colour or material decisions at once.</div>
+  </div>
+  <div class="legend-note">Rule of thumb: a nine-page document should show at least two registers, not one repeated with variations.</div>
+</div>
+
+<div class="wrap">
+
+<div class="page">
+  <div class="register-tag reg-weighted">WEIGHTED</div>
+  <div class="eyebrow-row"><span class="eyebrow">Visual Direction &mdash; 01</span><span class="page-num">Page 04</span></div>
+  <div class="headline">Shadow and warmth, held close rather than spread wide.</div>
+  <div class="body-text">The direction leans architectural &mdash; <b>dark, considered surfaces</b> against warm, sunlit ground. The brand mark, at full presence.</div>
+  <div class="depth-stack">
+        <div class="depth-arch arch-back"></div>
+        <div class="depth-arch arch-mid"></div>
+        <div class="depth-arch arch-front"></div>
+        <div class="arch-accent-circle"></div>
+      </div>
+      <div class="callout"><div class="callout-eyebrow">Use when</div><div class="callout-body">The cover, or the page carrying the central idea &mdash; the document's one moment of full weight.</div></div>
+  <div class="hand-note">quiet, but never plain.</div>
+  <div class="footer"><span>Visual Direction &mdash; 01</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+<div class="page">
+  <div class="register-tag reg-weighted">WEIGHTED</div>
+  <div class="eyebrow-row"><span class="eyebrow">Visual Direction &mdash; 02</span><span class="page-num">Page 07</span></div>
+  <div class="headline">Mass and shadow, used deliberately.</div>
+  <div class="body-text">One hero, one support, one small accent &mdash; clear hierarchy rather than even scatter.</div>
+  <div class="disc-trio">
+        <div class="disc disc-hero"></div>
+        <div class="disc disc-support"></div>
+        <div class="disc disc-accent"></div>
+      </div>
+      <div class="callout"><div class="callout-eyebrow">Use when</div><div class="callout-body">A page needs presence but isn't the cover &mdash; sparingly, never twice in one document.</div></div>
+  <div class="hand-note">restraint reads as confidence.</div>
+  <div class="footer"><span>Visual Direction &mdash; 02</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+<div class="page">
+  <div class="register-tag reg-weighted">WEIGHTED</div>
+  <div class="eyebrow-row"><span class="eyebrow">Material Direction &mdash; 01</span><span class="page-num">Page 06</span></div>
+  <div class="headline">A quieter page can still belong to the same visual world.</div>
+  <div class="body-text">Geometry moves to the edge, contained within the page &mdash; depth without competing with the content.</div>
+  <div class="edge-composition" aria-hidden="true">
+        <div class="edge-rule"></div><div class="edge-panel"></div><div class="edge-square"></div><div class="edge-disc"></div>
+      </div>
+      <div class="callout"><div class="callout-eyebrow">Use when</div><div class="callout-body">The page needs room for narrative and one hero image, still carrying real weight.</div></div>
+  <div class="hand-note">space is part of the direction.</div>
+  <div class="footer"><span>Material Direction &mdash; 01</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+<div class="page">
+  <div class="register-tag reg-functional">FUNCTIONAL</div>
+  <div class="eyebrow-row"><span class="eyebrow">Palette &amp; Cues &mdash; 01</span><span class="page-num">Page 05</span></div>
+  <div class="headline">Colour shown as atmosphere, not decorative swatches.</div>
+  <div class="body-text">Each card names what the tone actually does. This device does content work &mdash; it isn't optional the way the others are.</div>
+  <div class="colour-rail">
+        <div class="rail"></div>
+        <div class="rail-cards">
+          <div class="rail-card" style="background:var(--panel1);color:#fff;">Plum / intimate depth</div>
+          <div class="rail-card" style="background:var(--soft);color:#302A22;">Blush stone / tactile ground</div>
+          <div class="rail-card" style="background:var(--panel2);color:#fff;">Navy / evening structure</div>
+          <div class="rail-card" style="background:var(--accent);color:#302A22;">Peach / held warmth</div>
+        </div>
+      </div>
+  <div class="hand-note">the palette has jobs to do.</div>
+  <div class="footer"><span>Palette &amp; Cues &mdash; 01</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+<div class="page">
+  <div class="register-tag reg-gestural">GESTURAL</div>
+  <div class="eyebrow-row"><span class="eyebrow">Visual Direction &mdash; 03</span><span class="page-num">Page 08</span></div>
+  <div class="headline">The same mark, drawn rather than built.</div>
+  <div class="body-text">The brand mark as a line study &mdash; for pages that need to stay recognisably this studio without carrying full weight.</div>
+  <svg viewBox="0 0 460 260" width="380" height="215" style="margin: 10px 0 20px; position:relative; z-index:2;">
+<path d="M 40 260 L 40 140 A 90 90 0 0 1 220 140 L 220 260" fill="none" stroke="var(--panel1)" stroke-width="1.3" opacity="0.9"/>
+<path d="M 90 260 L 90 155 A 65 65 0 0 1 220 155 L 220 260" fill="none" stroke="var(--panel2)" stroke-width="1" opacity="0.7"/>
+<path d="M 260 260 L 260 170 A 50 50 0 0 1 360 170 L 360 260" fill="none" stroke="var(--deepest)" stroke-width="1.3" opacity="0.85"/>
+<circle cx="300" cy="140" r="9" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+<circle cx="300" cy="140" r="9" fill="var(--accent)" opacity="0.9"/>
+</svg>
+      <div class="callout"><div class="callout-eyebrow">Use when</div><div class="callout-body">A quieter page still needs the mark, not just any device.</div></div>
+  <div class="hand-note">drawn once, held lightly.</div>
+  <div class="footer"><span>Visual Direction &mdash; 03</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+<div class="page">
+  <div class="register-tag reg-gestural">GESTURAL</div>
+  <div class="eyebrow-row"><span class="eyebrow">Visual Direction &mdash; 04</span><span class="page-num">Page 09</span></div>
+  <div class="headline">One sweep of ink, not a shape.</div>
+  <div class="body-text">A single open stroke, thin at both ends. Rhythm comes from the two dots, not from a second line.</div>
+  <svg viewBox="0 0 380 220" width="380" height="220" style="margin:10px 0 20px; position:relative; z-index:2;">
+        <path d="M 231.76 85.41 L 233.41 91.13 L 235.04 96.91 L 236.21 102.82 L 236.59 108.84 L 236.48 114.87 L 235.99 120.88 L 235.12 126.85 L 233.88 132.75 L 232.28 138.57 L 230.32 144.27 L 228.00 149.84 L 225.35 155.25 L 222.36 160.49 L 219.04 165.53 L 215.42 170.35 L 211.51 174.94 L 207.32 179.28 L 202.86 183.35 L 198.17 187.13 L 193.24 190.61 L 188.11 193.77 L 182.78 196.61 L 177.30 199.11 L 171.66 201.26 L 165.91 203.06 L 160.05 204.50 L 154.11 205.56 L 148.12 206.26 L 142.10 206.58 L 136.07 206.52 L 130.05 206.09 L 124.07 205.28 L 118.16 204.10 L 112.33 202.55 L 106.61 200.65 L 101.02 198.39 L 95.58 195.78 L 90.31 192.84 L 85.24 189.58 L 80.38 186.01 L 75.75 182.14 L 71.38 177.99 L 67.27 173.57 L 63.44 168.91 L 59.91 164.02 L 56.70 158.92 L 53.81 153.62 L 51.26 148.16 L 49.05 142.55 L 47.19 136.81 L 45.70 130.96 L 44.58 125.04 L 43.83 119.05 L 43.45 113.03 L 43.45 107.00 L 43.82 100.98 L 44.57 95.00 L 45.69 89.07 L 47.18 83.23 L 49.04 77.49 L 51.24 71.88 L 53.79 66.41 L 56.68 61.12 L 59.89 56.01 L 63.42 51.12 L 67.24 46.46 L 71.35 42.04 L 75.72 37.89 L 80.35 34.02 L 85.21 30.44 L 90.28 27.18 L 95.54 24.24 L 100.98 21.63 L 106.57 19.37 L 112.29 17.46 L 118.12 15.91 L 124.04 14.73 L 130.01 13.92 L 136.03 13.48 L 142.06 13.42 L 148.08 13.74 L 154.07 14.49 L 159.97 15.69 L 165.76 17.33 L 171.41 19.35 L 176.90 21.74 L 182.23 24.44 L 187.38 27.42 L 192.36 30.66 L 197.17 34.13 L 197.17 34.13 L 192.30 30.76 L 187.18 27.77 L 181.86 25.18 L 176.39 22.97 L 170.80 21.12 L 165.12 19.61 L 159.39 18.43 L 153.62 17.54 L 147.82 16.93 L 141.99 16.62 L 136.16 16.68 L 130.35 17.10 L 124.57 17.88 L 118.85 19.03 L 113.21 20.52 L 107.68 22.37 L 102.28 24.56 L 97.02 27.08 L 91.93 29.92 L 87.02 33.08 L 82.33 36.53 L 77.85 40.28 L 73.62 44.29 L 69.65 48.56 L 65.96 53.07 L 62.55 57.80 L 59.44 62.74 L 56.65 67.86 L 54.18 73.14 L 52.05 78.57 L 50.26 84.12 L 48.82 89.77 L 47.73 95.50 L 47.01 101.28 L 46.64 107.10 L 46.65 112.93 L 47.01 118.75 L 47.74 124.54 L 48.83 130.27 L 50.27 135.92 L 52.06 141.47 L 54.20 146.89 L 56.67 152.18 L 59.46 157.29 L 62.57 162.23 L 65.98 166.96 L 69.68 171.47 L 73.65 175.74 L 77.88 179.75 L 82.35 183.49 L 87.05 186.94 L 91.96 190.10 L 97.05 192.94 L 102.31 195.46 L 107.72 197.64 L 113.25 199.49 L 118.88 200.98 L 124.60 202.12 L 130.38 202.90 L 136.20 203.32 L 142.03 203.38 L 147.85 203.07 L 153.64 202.40 L 159.38 201.37 L 165.05 199.98 L 170.61 198.24 L 176.06 196.16 L 181.37 193.74 L 186.51 191.00 L 191.48 187.93 L 196.24 184.57 L 200.78 180.92 L 205.09 176.98 L 209.14 172.79 L 212.93 168.36 L 216.43 163.69 L 219.63 158.82 L 222.52 153.75 L 225.09 148.52 L 227.33 143.13 L 229.22 137.62 L 230.77 132.00 L 231.97 126.29 L 232.81 120.52 L 233.28 114.71 L 233.39 108.88 L 233.26 103.04 L 233.19 97.16 L 232.82 91.25 L 231.76 85.41 Z" fill="var(--panel1)"/>
+        <path d="M 325.58 150.00 L 324.72 153.25 L 323.55 156.31 L 322.14 159.17 L 320.55 161.86 L 318.76 164.39 L 316.76 166.76 L 314.51 168.91 L 312.01 170.80 L 309.26 172.36 L 306.30 173.51 L 303.19 174.21 L 300.00 174.45 L 296.81 174.22 L 293.68 173.59 L 290.65 172.58 L 287.73 171.25 L 284.94 169.63 L 282.28 167.72 L 279.79 165.51 L 277.53 162.97 L 275.58 160.12 L 274.05 156.95 L 273.06 153.55 L 272.71 150.00 L 273.05 146.45 L 274.09 143.06 L 275.75 139.96 L 277.93 137.26 L 280.47 135.01 L 283.21 133.21 L 286.03 131.80 L 288.84 130.67 L 291.60 129.72 L 294.33 128.86 L 297.11 128.05 L 300.00 127.32 L 303.06 126.74 L 306.31 126.45 L 309.70 126.59 L 313.12 127.27 L 316.43 128.59 L 319.45 130.55 L 322.02 133.11 L 324.00 136.15 L 325.32 139.51 L 325.99 143.04 L 326.04 146.57 Z" fill="var(--accent)"/>
+        <path d="M 255.20 195.00 L 255.07 196.33 L 254.84 197.64 L 254.53 198.95 L 254.13 200.27 L 253.63 201.62 L 252.97 202.97 L 252.12 204.28 L 251.06 205.49 L 249.76 206.50 L 248.28 207.24 L 246.66 207.62 L 245.00 207.62 L 243.39 207.23 L 241.92 206.49 L 240.66 205.48 L 239.63 204.30 L 238.82 203.05 L 238.18 201.82 L 237.65 200.64 L 237.15 199.53 L 236.63 198.47 L 236.07 197.39 L 235.48 196.25 L 234.91 195.00 L 234.45 193.61 L 234.19 192.10 L 234.20 190.53 L 234.54 188.96 L 235.21 187.49 L 236.20 186.20 L 237.45 185.17 L 238.89 184.41 L 240.42 183.94 L 241.98 183.73 L 243.52 183.74 L 245.00 183.91 L 246.42 184.22 L 247.78 184.64 L 249.08 185.16 L 250.31 185.80 L 251.47 186.56 L 252.53 187.47 L 253.44 188.52 L 254.18 189.70 L 254.72 190.97 L 255.06 192.30 L 255.21 193.66 Z" fill="var(--panel2)"/>
+      </svg>
+      <div class="callout"><div class="callout-eyebrow">Use when</div><div class="callout-body">One more beat of variety, sparingly &mdash; never carrying content the way the colour rail does.</div></div>
+  <div class="hand-note">restraint reads as confidence.</div>
+  <div class="footer"><span>Visual Direction &mdash; 04</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+<div class="page">
+  <div class="register-tag reg-gestural">GESTURAL</div>
+  <div class="eyebrow-row"><span class="eyebrow">Material Direction &mdash; 02</span><span class="page-num">Page 10</span></div>
+  <div class="headline">A gesture toward florals, not an illustration of them.</div>
+  <div class="body-text">One sweep, two attached marks &mdash; abstract enough to hold any wedding's actual florals without competing.</div>
+  <svg viewBox="0 0 200 230" width="190" height="218" style="margin:14px 0 16px; position:relative; z-index:2;">
+        <path d="M 40.00 205.00 L 41.99 201.84 L 44.69 198.91 L 46.56 195.69 L 47.76 192.22 L 48.99 188.74 L 50.25 185.25 L 51.53 181.74 L 52.84 178.23 L 54.18 174.70 L 55.55 171.15 L 56.95 167.60 L 58.37 164.03 L 59.83 160.45 L 61.32 156.85 L 62.84 153.24 L 64.39 149.62 L 65.98 145.99 L 67.59 142.34 L 69.25 138.68 L 70.93 135.01 L 72.65 131.33 L 74.41 127.63 L 76.21 123.92 L 78.04 120.19 L 79.91 116.46 L 81.81 112.71 L 83.76 108.94 L 85.74 105.17 L 87.77 101.38 L 89.83 97.58 L 91.94 93.76 L 94.09 89.93 L 96.28 86.09 L 98.51 82.24 L 100.79 78.37 L 103.11 74.49 L 105.48 70.60 L 107.87 66.68 L 110.18 62.67 L 112.45 58.58 L 114.68 54.42 L 116.92 50.22 L 119.19 45.98 L 121.52 41.73 L 123.94 37.49 L 126.48 33.27 L 129.16 29.10 L 132.00 25.00 L 132.00 25.00 L 129.02 29.01 L 125.98 32.92 L 122.89 36.77 L 119.80 40.56 L 116.71 44.32 L 113.66 48.06 L 110.68 51.81 L 107.78 55.59 L 105.01 59.40 L 102.39 63.27 L 99.93 67.20 L 97.54 71.13 L 95.20 75.05 L 92.90 78.96 L 90.64 82.85 L 88.43 86.73 L 86.26 90.60 L 84.13 94.45 L 82.05 98.30 L 80.00 102.12 L 77.99 105.94 L 76.03 109.74 L 74.10 113.53 L 72.21 117.31 L 70.36 121.07 L 68.55 124.82 L 66.77 128.56 L 65.03 132.28 L 63.33 135.99 L 61.66 139.69 L 60.03 143.37 L 58.42 147.04 L 56.86 150.70 L 55.32 154.35 L 53.82 157.98 L 52.35 161.60 L 50.90 165.20 L 49.49 168.79 L 48.11 172.37 L 46.76 175.94 L 45.43 179.49 L 44.14 183.03 L 42.87 186.56 L 41.63 190.07 L 40.41 193.57 L 39.91 197.29 L 40.28 201.27 L 40.00 205.00 Z" fill="var(--panel1)"/>
+        <path d="M 97.77 112.00 L 97.91 113.31 L 97.73 114.61 L 97.22 115.82 L 96.45 116.88 L 95.48 117.74 L 94.38 118.38 L 93.25 118.84 L 92.12 119.14 L 91.04 119.33 L 90.00 119.45 L 88.99 119.54 L 88.00 119.59 L 87.00 119.60 L 85.98 119.53 L 84.96 119.34 L 83.95 119.01 L 82.99 118.52 L 82.12 117.88 L 81.36 117.09 L 80.73 116.20 L 80.24 115.22 L 79.86 114.18 L 79.60 113.11 L 79.45 112.00 L 79.39 110.87 L 79.44 109.71 L 79.62 108.53 L 79.97 107.37 L 80.51 106.25 L 81.25 105.25 L 82.18 104.42 L 83.27 103.81 L 84.46 103.46 L 85.69 103.38 L 86.89 103.55 L 88.00 103.92 L 89.00 104.42 L 89.88 104.97 L 90.68 105.53 L 91.44 106.04 L 92.21 106.51 L 93.03 106.97 L 93.91 107.46 L 94.85 108.05 L 95.78 108.78 L 96.63 109.69 L 97.32 110.77 Z" fill="var(--accent)"/>
+        <path d="M 62.66 163.00 L 62.64 163.74 L 62.51 164.48 L 62.26 165.18 L 61.90 165.83 L 61.45 166.42 L 60.94 166.94 L 60.39 167.41 L 59.80 167.84 L 59.17 168.25 L 58.51 168.63 L 57.79 168.98 L 57.00 169.27 L 56.15 169.47 L 55.25 169.54 L 54.33 169.43 L 53.46 169.13 L 52.68 168.63 L 52.05 167.95 L 51.62 167.13 L 51.39 166.24 L 51.36 165.34 L 51.49 164.48 L 51.73 163.69 L 52.01 163.00 L 52.28 162.38 L 52.50 161.79 L 52.67 161.21 L 52.80 160.58 L 52.94 159.88 L 53.13 159.13 L 53.43 158.34 L 53.87 157.58 L 54.47 156.90 L 55.22 156.36 L 56.08 156.03 L 57.00 155.92 L 57.92 156.04 L 58.78 156.36 L 59.55 156.85 L 60.21 157.44 L 60.76 158.11 L 61.21 158.79 L 61.59 159.48 L 61.91 160.17 L 62.18 160.85 L 62.41 161.55 L 62.57 162.27 Z" fill="var(--panel2)"/>
+      </svg>
+      <div class="callout" style="transform: rotate(1deg);"><div class="callout-eyebrow">Use when</div><div class="callout-body">A margin needs one small sign of craft &mdash; never a page's central graphic.</div></div>
+  <div class="hand-note">the whole garden, in one stem.</div>
+  <div class="footer"><span>Material Direction &mdash; 02</span><span>Wedding Brief Studio &mdash; device framework v2</span></div>
+</div>
+</div>
+
+</body>
+</html>

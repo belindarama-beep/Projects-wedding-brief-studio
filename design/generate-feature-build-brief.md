@@ -16,10 +16,10 @@ Take the `direction_versions` row Approve now produces for Arden & Theo, and ren
 - **Content mapping**: map `direction_versions.content` (central idea, visual direction narrative, colour/material direction, priority moments, what to avoid, budget tiers, still-open questions) onto the nine confirmed pages
 - **Flow layout conversion**: wherever the existing templates still use fixed pixel positioning, convert to flexbox/grid so variable-length real content (a longer headline, a longer narrative paragraph) doesn't break the page. This is a precondition for the rest of this phase to mean anything, not a separate cleanup task — confirm current state before assuming how much of this remains
 - **Preset application**: apply whichever of the four style presets the project is set to (planner-controlled, project-level — confirm how/where that's currently stored), using the token values in `wedding-brief-studio-brand-guidelines-v2.html`
-- **Composition rules for the visual direction pages** — these came out of a live test against thin and rich content and aren't optional polish, they're what the flow-layout conversion needs to actually satisfy:
+- **Composition rules for the visual direction pages** — these came out of a live design exploration and aren't optional polish, they're what the flow-layout conversion needs to actually satisfy:
   - Image slots must absorb anywhere from 1 to ~5 uploaded images without the layout breaking or needing a different template
-  - Depth comes from a layered arch stack (2–3 shapes with real shadow between them, one darker gradient, one light counterpart, one small accent) contained to a defined zone — never a full-bleed dark background. This is both a print-cost concern and the actual mechanism that gives the page presence
-  - A pleated fan-accent motif may appear at most once per page, small, subordinate to the arch — it's a texture, not a second signature device
+  - The document now has seven visual devices across three registers (weighted / gestural / functional) — see `wedding-brief-studio-composition-devices.html` for the full decision table. **A document must draw from at least two registers across its nine pages.** Repeating one device identically on consecutive pages is the specific failure this system was built to prevent, and it's exactly what happened in the first real Arden & Theo render — don't repeat it
+  - All weighted-register devices stay contained to a defined zone — never a full-bleed dark background. This is both a print-cost concern and the actual mechanism that gives a page presence
 - **Inspiration imagery**: weave uploaded source images into the visual direction pages. For this phase, planner-selected is enough — the planner marks which uploaded images belong in the document, rather than the system choosing automatically. Automatic selection is a reasonable future refinement, not required now
 - **Planner mark slot**: logo image if supplied, gracefully falling back to a styled text wordmark if not — per the brand guidelines, documents go out under the planner's own business name, never "Wedding Brief Studio"
 - **On-screen render first**: the document renders as an HTML view inside the app before any export exists
@@ -59,6 +59,13 @@ anything:
 - generate-feature-build-brief.md — this brief, full scope
 - wedding-brief-studio-brand-guidelines-v2.html — current token source of truth
   (four presets: Terracotta & Architecture, Ancient Rose, Fig, Lilac & Sage)
+- wedding-brief-studio-composition-devices.html — the device decision table:
+  seven visual devices across three registers (weighted / gestural /
+  functional), each with a specific job. A real document must draw from at
+  least two registers across its nine pages — repeating one device
+  identically (as the first Arden & Theo render did with the arch stack) is
+  the exact failure mode this file exists to prevent. Read the legend at the
+  top before touching the visual direction pages.
 - visual-direction-palette-test.html — working reference implementation of the
   composition rules (image slots absorbing 1-5 photos, the layered arch-stack
   depth device, print-conscious containment) — read the actual CSS here, don't

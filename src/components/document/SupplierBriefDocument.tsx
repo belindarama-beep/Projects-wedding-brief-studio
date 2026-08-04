@@ -1,6 +1,6 @@
 import "./document.css";
 import { resolveStylePreset, presetCssVars } from "@/lib/document/presets";
-import { floralStylingAvoidList } from "@/lib/document/supplierBriefContent";
+import { floralStylingAvoidList, guestCountFromFixedDecisions } from "@/lib/document/supplierBriefContent";
 import { PlannerMark } from "./PlannerMark";
 import { plexMono, plexSans, beauRivage } from "./fonts";
 import type { SupplierBriefDocumentData } from "@/lib/document/types";
@@ -28,10 +28,14 @@ function ContextItem({ label, value }: { label: string; value: string | null }) 
 export function SupplierBriefDocument({ data }: { data: SupplierBriefDocumentData }) {
   const { project, planner, direction, budgetTiers } = data;
   const tokens = resolveStylePreset(data.preset);
-  const { colour_material_direction, what_to_avoid } = direction.content;
+  const { colour_material_direction, what_to_avoid, fixed_decisions } = direction.content;
 
   const avoidList = floralStylingAvoidList(what_to_avoid);
   const essential = budgetTiers?.essential ?? null;
+  const guestCountLabel =
+    project.guestCount !== null
+      ? `${project.guestCount} guests`
+      : guestCountFromFixedDecisions(fixed_decisions);
 
   return (
     <div
@@ -51,10 +55,7 @@ export function SupplierBriefDocument({ data }: { data: SupplierBriefDocumentDat
           <div className="wbs-brief-context">
             <ContextItem label="Venue" value={project.venue} />
             <ContextItem label="Wedding date" value={formatDate(project.weddingDate)} />
-            <ContextItem
-              label="Guest count"
-              value={project.guestCount !== null ? `${project.guestCount} guests` : null}
-            />
+            <ContextItem label="Guest count" value={guestCountLabel} />
           </div>
         </header>
 

@@ -12,3 +12,18 @@ const NON_FLORAL_STYLING_PATTERN =
 export function floralStylingAvoidList(whatToAvoid: string[]): string[] {
   return whatToAvoid.filter((item) => !NON_FLORAL_STYLING_PATTERN.test(item));
 }
+
+// projects.guest_count is the structured source, but it isn't always filled
+// in — the Direction Spelled Out and internal Direction views already
+// surface the real number by printing fixed_decisions verbatim (e.g.
+// "Approx. 92 guests, 14 August 2027, ..."). Read the same substring rather
+// than leaving this honestly-available number marked "not yet confirmed."
+const GUEST_COUNT_PATTERN = /(?:approx\.?\s*)?\d[\d,]*\+?\s*guests?/i;
+
+export function guestCountFromFixedDecisions(fixedDecisions: string[]): string | null {
+  for (const item of fixedDecisions) {
+    const match = item.match(GUEST_COUNT_PATTERN);
+    if (match) return match[0];
+  }
+  return null;
+}

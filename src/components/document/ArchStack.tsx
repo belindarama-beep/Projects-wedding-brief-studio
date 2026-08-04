@@ -1,18 +1,13 @@
 import type { CSSProperties } from "react";
-import { FanAccent } from "./FanAccent";
 
 /**
- * The depth device: 2-3 layered, shadowed arch shapes contained to a
- * defined zone, plus one small accent circle — never a full-bleed dark
- * background. Mirrors design/visual-direction-palette-test.html.
+ * Weighted register — the primary device. Reserved for the page carrying
+ * the central idea (the cover has its own distinct full-bleed treatment).
+ * 2-3 layered, shadowed arch shapes contained to a defined zone, plus one
+ * small accent circle — never a full-bleed dark background. Mirrors
+ * design/wedding-brief-studio-composition-devices.html.
  */
-export function ArchStack({
-  compact = false,
-  showFan = false,
-}: {
-  compact?: boolean;
-  showFan?: boolean;
-}) {
+export function ArchStack({ compact = false }: { compact?: boolean }) {
   const stackStyle: CSSProperties | undefined = compact ? { height: 190 } : undefined;
   const backStyle: CSSProperties | undefined = compact ? { height: 160 } : undefined;
   const midStyle: CSSProperties | undefined = compact ? { height: 130 } : undefined;
@@ -25,7 +20,6 @@ export function ArchStack({
       <div className="wbs-depth-arch wbs-arch-mid" style={midStyle} />
       <div className="wbs-depth-arch wbs-arch-front" style={frontStyle} />
       <div className="wbs-arch-accent" style={accentStyle} />
-      {showFan && <FanAccent style={{ right: 0, bottom: 6 }} />}
     </div>
   );
 }

@@ -35,6 +35,8 @@
 }
 
 .wbs-eyebrow-row {
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -57,6 +59,8 @@
 }
 
 .wbs-headline {
+  position: relative;
+  z-index: 2;
   font-family: var(--font-plex-mono), monospace;
   font-weight: 600;
   font-size: 27px;
@@ -66,6 +70,8 @@
   color: #201A14;
 }
 .wbs-body {
+  position: relative;
+  z-index: 2;
   font-family: var(--font-plex-sans), sans-serif;
   font-size: 14.5px;
   line-height: 1.75;
@@ -76,6 +82,8 @@
 .wbs-body b, .wbs-body strong { color: var(--panel1); }
 
 .wbs-hand-note {
+  position: relative;
+  z-index: 2;
   font-family: var(--font-beau-rivage), cursive;
   font-size: 30px;
   color: var(--panel1);
@@ -90,6 +98,8 @@
 }
 
 .wbs-footer {
+  position: relative;
+  z-index: 2;
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid rgba(32, 26, 20, 0.15);
@@ -156,16 +166,93 @@
   box-shadow: 0 8px 16px rgba(15, 8, 7, 0.22);
 }
 
-/* ---------- fan-pleat accent — texture, at most once per page ---------- */
-.wbs-fan-accent {
+/* ---------- edge composition (weighted) — geometry pushed to the page edge,
+   contained to a defined zone, for a narrative-heavy page that still needs
+   real weight. Ported from design/wedding-brief-studio-composition-devices.html ---------- */
+.wbs-edge-composition {
   position: absolute;
-  width: 84px; height: 64px;
-  opacity: 0.9;
+  right: 54px; top: 160px;
+  width: 150px; height: 340px;
+  z-index: 1;
   pointer-events: none;
+}
+.wbs-edge-panel {
+  position: absolute; right: 0; top: 0;
+  width: 88px; height: 320px;
+  background: var(--panel1);
+  border-radius: 70% 6px 6px 70% / 32% 6px 6px 32%;
+  opacity: 0.96;
+}
+.wbs-edge-square {
+  position: absolute; width: 94px; height: 112px; right: 64px; top: 56px;
+  background: var(--panel2);
+  border-radius: 20% 60% 20% 60%;
+  box-shadow: 0 13px 22px rgba(15, 8, 7, 0.2);
+}
+.wbs-edge-disc {
+  position: absolute; width: 104px; height: 104px; right: 40px; bottom: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 13px 22px rgba(15, 8, 7, 0.2);
+}
+.wbs-edge-rule {
+  position: absolute; width: 60px; height: 1px; right: 100px; top: 38px;
+  background: rgba(67, 36, 48, 0.4);
+  transform: rotate(-14deg);
+  transform-origin: right;
+}
+
+/* ---------- fine-line arch (gestural) — the brand mark as a line study ---------- */
+.wbs-fine-line-arch {
+  margin: 10px 0 20px;
+}
+
+/* ---------- ink-sweep circle (gestural) — one sweep, rhythm from the dots ---------- */
+.wbs-ink-sweep {
+  margin: 10px 0 20px;
+}
+
+/* ---------- gestural sprig (gestural) — a small sign of craft in a margin,
+   never a page's central graphic ---------- */
+.wbs-sprig {
+  width: 96px;
+  opacity: 0.92;
+}
+
+/* ---------- colour rail (functional) — colour shown as atmosphere doing
+   content work, not decorative swatches ---------- */
+.wbs-colour-rail {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 16px;
+  margin: 8px 0 20px;
+  max-width: 440px;
+}
+.wbs-colour-rail .wbs-rail {
+  border-radius: 999px;
+}
+.wbs-rail-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.wbs-rail-card {
+  min-height: 88px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-end;
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 16px rgba(15, 8, 7, 0.12);
+  border-radius: 12px;
 }
 
 /* ---------- image slots — absorb 1 to ~5 uploaded images ---------- */
 .wbs-image-grid {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -205,6 +292,8 @@
 
 /* ---------- callout ---------- */
 .wbs-callout {
+  position: relative;
+  z-index: 2;
   background: #fff;
   border: 1px solid rgba(32, 26, 20, 0.16);
   border-radius: 16px;
@@ -226,7 +315,7 @@
 .wbs-callout-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 8px 0 28px; }
 
 /* ---------- lists ---------- */
-.wbs-list { list-style: none; max-width: 480px; margin: 0 0 20px; padding: 0; }
+.wbs-list { position: relative; z-index: 2; list-style: none; max-width: 480px; margin: 0 0 20px; padding: 0; }
 .wbs-list li {
   position: relative; padding-left: 20px; margin-bottom: 12px;
   font-size: 13.5px; line-height: 1.6; color: #302A22;
@@ -237,6 +326,7 @@
 }
 
 .wbs-section-label {
+  position: relative; z-index: 2;
   font-family: var(--font-plex-mono), monospace;
   font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
   color: rgba(32, 26, 20, 0.55); margin: 24px 0 10px;

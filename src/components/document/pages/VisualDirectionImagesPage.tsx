@@ -1,11 +1,16 @@
 import { DocumentPage } from "../DocumentPage";
 import { PlannerMark } from "../PlannerMark";
 import { Callout, HandNote } from "../Callout";
-import { ArchStack } from "../ArchStack";
+import { EdgeComposition } from "../devices/EdgeComposition";
 import { ImageGrid } from "../ImageGrid";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
-/** Visual Direction — 01: the narrative plus the planner-selected inspiration imagery, absorbing 1 to ~5 photos. */
+/**
+ * Visual Direction — 01: the narrative plus the planner-selected inspiration
+ * imagery, absorbing 1 to ~5 photos. Weighted register via edge composition
+ * (not the arch stack — that's reserved for the central-idea page) — this
+ * page needs room for narrative and images alongside real weight.
+ */
 export function VisualDirectionImagesPage({ data }: { data: CreativeDirectionDocumentData }) {
   const { project, direction, planner, images } = data;
 
@@ -17,12 +22,18 @@ export function VisualDirectionImagesPage({ data }: { data: CreativeDirectionDoc
       footerRight={project.coupleNames}
       mark={<PlannerMark logoUrl={planner.logoUrl} businessName={planner.businessName} />}
     >
-      <h1 className="wbs-headline">The visual direction, as we understood it.</h1>
-      <p className="wbs-body">{direction.content.visual_direction}</p>
+      <EdgeComposition />
 
-      <ArchStack showFan={images.length === 0} />
+      <h1 className="wbs-headline" style={{ maxWidth: 420 }}>
+        The visual direction, as we understood it.
+      </h1>
+      <p className="wbs-body" style={{ maxWidth: 420 }}>
+        {direction.content.visual_direction}
+      </p>
 
-      <ImageGrid images={images} />
+      <div style={{ maxWidth: 460 }}>
+        <ImageGrid images={images} />
+      </div>
 
       <Callout eyebrow="Why this reads as them">
         {direction.content.central_idea.split(".")[0]}.

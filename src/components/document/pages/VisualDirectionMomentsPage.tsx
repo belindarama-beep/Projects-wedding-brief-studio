@@ -1,10 +1,14 @@
 import { DocumentPage } from "../DocumentPage";
 import { PlannerMark } from "../PlannerMark";
 import { HandNote } from "../Callout";
-import { ArchStack } from "../ArchStack";
+import { FineLineArch } from "../devices/FineLineArch";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
-/** Visual Direction — 03: the priority moments, ranked. */
+/**
+ * Visual Direction — 03: the priority moments, ranked. Gestural register —
+ * a quiet, list-driven page that still needs the brand mark, just not at
+ * full weight.
+ */
 export function VisualDirectionMomentsPage({ data }: { data: CreativeDirectionDocumentData }) {
   const { project, direction, planner } = data;
 
@@ -28,7 +32,7 @@ export function VisualDirectionMomentsPage({ data }: { data: CreativeDirectionDo
         ))}
       </ul>
 
-      <ArchStack compact />
+      <FineLineArch />
 
       <HandNote>this is where we made sure it landed.</HandNote>
     </DocumentPage>

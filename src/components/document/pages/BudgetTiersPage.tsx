@@ -1,8 +1,14 @@
 import { DocumentPage } from "../DocumentPage";
 import { PlannerMark } from "../PlannerMark";
 import { HandNote } from "../Callout";
+import { GesturalSprig } from "../devices/GesturalSprig";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
+/**
+ * The tier grid already does the page's functional-register work; a small
+ * gestural sprig in the margin softens what would otherwise be an entirely
+ * utilitarian page — never the page's central graphic.
+ */
 export function BudgetTiersPage({ data }: { data: CreativeDirectionDocumentData }) {
   const { project, direction, planner, budgetTiers } = data;
 
@@ -41,7 +47,10 @@ export function BudgetTiersPage({ data }: { data: CreativeDirectionDocumentData 
         </p>
       )}
 
-      <HandNote>real trade-offs, not upsell copy.</HandNote>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <HandNote>real trade-offs, not upsell copy.</HandNote>
+        <GesturalSprig />
+      </div>
     </DocumentPage>
   );
 }

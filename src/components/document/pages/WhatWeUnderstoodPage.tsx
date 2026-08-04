@@ -4,6 +4,11 @@ import { Callout, HandNote } from "../Callout";
 import { ArchStack } from "../ArchStack";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
+/**
+ * The page carrying the central idea — the arch stack's designated spot per
+ * the device legend, the document's one moment of full weighted presence
+ * outside the cover itself.
+ */
 export function WhatWeUnderstoodPage({ data }: { data: CreativeDirectionDocumentData }) {
   const { project, direction, planner } = data;
   const moments = direction.content.priority_moments;

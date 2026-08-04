@@ -1,8 +1,14 @@
 import { DocumentPage } from "../DocumentPage";
 import { PlannerMark } from "../PlannerMark";
 import { HandNote } from "../Callout";
+import { InkSweepCircle } from "../devices/InkSweepCircle";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
+/**
+ * Gestural register — one more beat of variety on a page that's otherwise
+ * three dense lists, placed near the top so it doesn't get buried under
+ * real, variable-length content.
+ */
 export function DirectionSpelledOutPage({ data }: { data: CreativeDirectionDocumentData }) {
   const { project, direction, planner } = data;
   const { fixed_decisions, flexible_decisions, what_to_avoid } = direction.content;
@@ -19,6 +25,8 @@ export function DirectionSpelledOutPage({ data }: { data: CreativeDirectionDocum
       <p className="wbs-body">
         Some of this is decided. Some is still moving. Both are worth naming plainly.
       </p>
+
+      <InkSweepCircle compact />
 
       {fixed_decisions.length > 0 && (
         <>

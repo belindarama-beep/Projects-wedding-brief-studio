@@ -1,10 +1,14 @@
 import { DocumentPage } from "../DocumentPage";
 import { PlannerMark } from "../PlannerMark";
 import { HandNote } from "../Callout";
-import { ArchStack } from "../ArchStack";
+import { ColourRail } from "../devices/ColourRail";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
-/** Visual Direction — 02: colour & material direction. */
+/**
+ * Visual Direction — 02: colour & material direction. Functional register —
+ * this page names several distinct colour/material decisions at once, which
+ * is exactly the colour rail's job (content work, not a decorative swatch).
+ */
 export function VisualDirectionColourPage({ data }: { data: CreativeDirectionDocumentData }) {
   const { project, direction, planner } = data;
 
@@ -19,15 +23,7 @@ export function VisualDirectionColourPage({ data }: { data: CreativeDirectionDoc
       <h1 className="wbs-headline">Colour and material, held consistently.</h1>
       <p className="wbs-body">{direction.content.colour_material_direction}</p>
 
-      <div className="wbs-cover-bar" style={{ width: 220, marginTop: 8 }}>
-        <span style={{ background: "var(--panel1)" }} />
-        <span style={{ background: "var(--panel2)" }} />
-        <span style={{ background: "var(--deepest)" }} />
-        <span style={{ background: "var(--soft)" }} />
-        <span style={{ background: "var(--accent)" }} />
-      </div>
-
-      <ArchStack compact showFan />
+      <ColourRail />
 
       <HandNote>the same hand, every surface.</HandNote>
     </DocumentPage>

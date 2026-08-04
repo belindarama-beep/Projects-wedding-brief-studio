@@ -7,6 +7,7 @@ export function DocumentPage({
   footerRight,
   mark,
   hideHeader = false,
+  footerLeftOnDarkGround = false,
   children,
 }: {
   eyebrow: string;
@@ -16,6 +17,9 @@ export function DocumentPage({
   mark?: ReactNode;
   /** Cover uses its own self-contained header (arch panel), never the shared eyebrow row. */
   hideHeader?: boolean;
+  /** Cover: footerLeft sits over the dark arch panel, which the footer's
+   * default (page-background-appropriate) dark text has no contrast against. */
+  footerLeftOnDarkGround?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -31,7 +35,9 @@ export function DocumentPage({
       )}
       <div className="wbs-content">{children}</div>
       <div className="wbs-footer">
-        <span>{footerLeft}</span>
+        <span style={footerLeftOnDarkGround ? { color: "rgba(255, 255, 255, 0.75)" } : undefined}>
+          {footerLeft}
+        </span>
         <span>{footerRight}</span>
       </div>
     </section>

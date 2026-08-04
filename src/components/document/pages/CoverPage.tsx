@@ -18,6 +18,7 @@ export function CoverPage({ data }: { data: CreativeDirectionDocumentData }) {
   return (
     <DocumentPage
       hideHeader
+      footerLeftOnDarkGround
       eyebrow="Creative Direction"
       pageNum="Page 01"
       footerLeft={project.coupleNames}

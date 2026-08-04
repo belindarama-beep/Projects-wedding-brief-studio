@@ -350,9 +350,17 @@
   display: flex;
   flex-direction: column;
 }
+/* Flows normally rather than a fixed-height absolute box pinned between
+   top/bottom offsets — real venue/date/version metadata is variable-length
+   and was overflowing that fixed box into the footer below it. Letting it
+   flow means .wbs-page (min-height, not height) just grows if it needs to,
+   same principle as every other page in this document. */
 .wbs-cover-right {
-  position: absolute;
-  left: 46%; right: 54px; top: 60px; bottom: 100px;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  margin-left: 46%;
+  padding-top: 4px;
   display: flex;
   flex-direction: column;
 }
@@ -377,7 +385,8 @@
 .wbs-cover-bar span { flex: 1; }
 .wbs-cover-meta {
   font-family: var(--font-plex-mono), monospace; font-size: 10.5px;
-  color: rgba(32, 26, 20, 0.55); letter-spacing: 0.05em; margin-top: auto;
+  color: rgba(32, 26, 20, 0.55); letter-spacing: 0.05em; margin-top: auto; line-height: 1.6;
+  padding-top: 24px;
 }
 
 /* ---------- budget tiers ---------- */

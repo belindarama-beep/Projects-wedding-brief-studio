@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CollectView } from "@/components/CollectView";
 import { ExtractionView } from "@/components/ExtractionView";
 import { GenerateView } from "@/components/GenerateView";
+import { ProjectDetailsSection } from "@/components/ProjectDetailsSection";
 import type {
   DirectionVersion,
   Extraction,
@@ -26,7 +27,7 @@ export default async function ProjectPage() {
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, couple_names, venue, wedding_date, guest_count, style_preset")
+    .select("id, couple_names, venue, wedding_date, guest_count, budget, style_preset")
     .ilike("couple_names", "Arden & Theo")
     .single();
 
@@ -132,6 +133,7 @@ export default async function ProjectPage() {
 
   return (
     <>
+      <ProjectDetailsSection project={project} />
       <CollectView
         project={project}
         initialSources={typedSources}

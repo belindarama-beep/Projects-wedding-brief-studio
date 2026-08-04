@@ -14,12 +14,29 @@ function formatDate(iso: string | null) {
   });
 }
 
-function ContextItem({ label, value }: { label: string; value: string | null }) {
+function formatBudget(budget: string | null) {
+  if (budget === null) return null;
+  return new Intl.NumberFormat("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    maximumFractionDigits: 0,
+  }).format(Number(budget));
+}
+
+function ContextItem({
+  label,
+  value,
+  emptyLabel = "Not yet confirmed",
+}: {
+  label: string;
+  value: string | null;
+  emptyLabel?: string;
+}) {
   return (
     <div>
       <div className="wbs-brief-context-label">{label}</div>
       <div className={`wbs-brief-context-value${value ? "" : " wbs-brief-unconfirmed"}`}>
-        {value ?? "Not yet confirmed"}
+        {value ?? emptyLabel}
       </div>
     </div>
   );
@@ -53,6 +70,11 @@ export function SupplierBriefDocument({ data }: { data: SupplierBriefDocumentDat
             <ContextItem label="Venue" value={project.venue} />
             <ContextItem label="Wedding date" value={formatDate(project.weddingDate)} />
             <ContextItem label="Guest count" value={guestCountLabel} />
+            <ContextItem
+              label="Budget"
+              value={formatBudget(project.budget)}
+              emptyLabel="Not yet decided"
+            />
           </div>
         </header>
 

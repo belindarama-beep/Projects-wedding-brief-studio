@@ -111,6 +111,9 @@ export type Project = {
   venue: string | null;
   wedding_date: string | null;
   guest_count: number | null;
+  // numeric columns come back from PostgREST as strings to avoid float
+  // precision loss — parse with Number() when formatting for display.
+  budget: string | null;
   style_preset: string | null;
 };
 

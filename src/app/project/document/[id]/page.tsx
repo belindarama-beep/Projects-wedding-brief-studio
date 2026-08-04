@@ -34,7 +34,7 @@ export default async function DocumentPage({
   const [{ data: project }, { data: direction }] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, couple_names, venue, wedding_date, guest_count, style_preset, planner_id")
+      .select("id, couple_names, venue, wedding_date, guest_count, budget, style_preset, planner_id")
       .eq("id", document.project_id)
       .single(),
     document.direction_version_id
@@ -130,6 +130,7 @@ export default async function DocumentPage({
       venue: typedProject.venue,
       weddingDate: typedProject.wedding_date,
       guestCount: typedProject.guest_count,
+      budget: typedProject.budget,
     },
     planner: {
       businessName: (planner as Planner | null)?.business_name ?? null,

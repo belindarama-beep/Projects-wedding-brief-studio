@@ -10,6 +10,7 @@ export type DocumentBaseData = {
     venue: string | null;
     weddingDate: string | null;
     guestCount: number | null;
+    budget: string | null;
   };
   planner: {
     businessName: string | null;

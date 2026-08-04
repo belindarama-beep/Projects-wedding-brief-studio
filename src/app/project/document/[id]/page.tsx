@@ -1,9 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CreativeDirectionDocument } from "@/components/document/CreativeDirectionDocument";
+import { SupplierBriefDocument } from "@/components/document/SupplierBriefDocument";
 import { ExportPdfButton } from "./ExportPdfButton";
 import { isStylePresetSlug, DEFAULT_STYLE_PRESET } from "@/lib/document/presets";
-import type { CreativeDirectionDocumentData } from "@/lib/document/types";
+import type { DocumentBaseData } from "@/lib/document/types";
 import type { DirectionVersion, DocumentRow, Planner, Project, Source } from "@/lib/types";
 
 export default async function DocumentPage({
@@ -33,7 +34,7 @@ export default async function DocumentPage({
   const [{ data: project }, { data: direction }] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, couple_names, venue, wedding_date, style_preset, planner_id")
+      .select("id, couple_names, venue, wedding_date, guest_count, style_preset, planner_id")
       .eq("id", document.project_id)
       .single(),
     document.direction_version_id
@@ -90,8 +91,8 @@ export default async function DocumentPage({
     .eq("id", typedProject.planner_id)
     .single();
 
-  let images: CreativeDirectionDocumentData["images"] = [];
-  if (document.selected_image_ids.length > 0) {
+  let images: { id: string; url: string; alt: string }[] = [];
+  if (document.document_type === "creative_direction" && document.selected_image_ids.length > 0) {
     const { data: imageSources } = await supabase
       .from("source_items")
       .select("id, project_id, type, raw_content, file_path, transcribed_text, attribution, added_at")
@@ -122,12 +123,13 @@ export default async function DocumentPage({
     }
   }
 
-  const data: CreativeDirectionDocumentData = {
+  const baseData: DocumentBaseData = {
     documentId: document.id,
     project: {
       coupleNames: typedProject.couple_names ?? "Untitled project",
       venue: typedProject.venue,
       weddingDate: typedProject.wedding_date,
+      guestCount: typedProject.guest_count,
     },
     planner: {
       businessName: (planner as Planner | null)?.business_name ?? null,
@@ -141,8 +143,10 @@ export default async function DocumentPage({
     preset: isStylePresetSlug(document.template_preset)
       ? document.template_preset
       : DEFAULT_STYLE_PRESET,
-    images,
-    budgetTiers: document.generated_content?.budget_tiers ?? null,
+    // The tier-generation edge function writes essential/elevated/signature
+    // straight into generated_content — read it as-is, not nested under a
+    // "budget_tiers" key that was never actually written.
+    budgetTiers: document.generated_content,
     generatedAt: document.created_at,
   };
 
@@ -154,7 +158,11 @@ export default async function DocumentPage({
         </a>
         <ExportPdfButton documentId={document.id} existingFilePath={document.file_path} />
       </div>
-      <CreativeDirectionDocument data={data} />
+      {document.document_type === "supplier_brief" ? (
+        <SupplierBriefDocument data={baseData} />
+      ) : (
+        <CreativeDirectionDocument data={{ ...baseData, images }} />
+      )}
     </div>
   );
 }

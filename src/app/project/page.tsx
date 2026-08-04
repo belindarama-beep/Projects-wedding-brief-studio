@@ -26,7 +26,7 @@ export default async function ProjectPage() {
 
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, couple_names, venue, wedding_date, style_preset")
+    .select("id, couple_names, venue, wedding_date, guest_count, style_preset")
     .ilike("couple_names", "Arden & Theo")
     .single();
 

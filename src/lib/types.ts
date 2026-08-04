@@ -110,6 +110,7 @@ export type Project = {
   couple_names: string | null;
   venue: string | null;
   wedding_date: string | null;
+  guest_count: number | null;
   style_preset: string | null;
 };
 
@@ -140,7 +141,10 @@ export type DocumentRow = {
   document_type: DocumentType;
   template_preset: string | null;
   selected_image_ids: string[];
-  generated_content: { budget_tiers?: BudgetTiers } | null;
+  // The generate-document-content edge function writes the tier object
+  // directly (essential/elevated/signature at the top level) — not nested
+  // under a "budget_tiers" key. Matches what's actually in the DB.
+  generated_content: BudgetTiers | null;
   file_path: string | null;
   created_at: string;
 };

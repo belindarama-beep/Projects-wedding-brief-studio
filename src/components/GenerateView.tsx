@@ -36,6 +36,7 @@ export function GenerateView({
   );
   const [selectedImageIds, setSelectedImageIds] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [generatingBrief, setGeneratingBrief] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!latest) {
@@ -99,6 +100,49 @@ export function GenerateView({
       .single();
 
     setGenerating(false);
+
+    if (insertError || !doc) {
+      setError(insertError?.message ?? "Could not save the generated document");
+      return;
+    }
+
+    router.push(`/project/document/${doc.id}`);
+  }
+
+  async function handleGenerateSupplierBrief() {
+    setGeneratingBrief(true);
+    setError(null);
+
+    const supabase = createClient();
+
+    // Reuse whatever budget-tier content was already generated for this
+    // approved direction — no new AI call. If no Creative Direction document
+    // has been generated for this version yet, generated_content stays null
+    // and the brief renders its honest "not yet available" state.
+    const { data: existingDoc } = await supabase
+      .from("documents")
+      .select("generated_content")
+      .eq("project_id", project.id)
+      .eq("document_type", "creative_direction")
+      .eq("direction_version_id", latest!.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { data: doc, error: insertError } = await supabase
+      .from("documents")
+      .insert({
+        project_id: project.id,
+        direction_version_id: latest!.id,
+        document_type: "supplier_brief",
+        template_preset: preset,
+        selected_image_ids: [],
+        generated_content: existingDoc?.generated_content ?? null,
+      })
+      .select("id")
+      .single();
+
+    setGeneratingBrief(false);
 
     if (insertError || !doc) {
       setError(insertError?.message ?? "Could not save the generated document");
@@ -196,14 +240,24 @@ export function GenerateView({
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      <button
-        type="button"
-        onClick={handleGenerate}
-        disabled={generating}
-        className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
-        {generating ? "Generating…" : "Generate Creative Direction document"}
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generating || generatingBrief}
+          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {generating ? "Generating…" : "Generate Creative Direction document"}
+        </button>
+        <button
+          type="button"
+          onClick={handleGenerateSupplierBrief}
+          disabled={generating || generatingBrief}
+          className="rounded-md border border-neutral-900 px-4 py-2 text-sm font-medium text-neutral-900 disabled:opacity-50"
+        >
+          {generatingBrief ? "Generating…" : "Generate Floral & Styling Supplier Brief"}
+        </button>
+      </div>
     </section>
   );
 }

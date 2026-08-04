@@ -446,3 +446,143 @@
   .wbs-doc { background: #fff; padding: 0; gap: 0; }
   .wbs-page { box-shadow: none; break-after: page; }
 }
+
+/* ==========================================================================
+   Supplier Brief — a distinct structural layout, not the nine-page lookbook.
+   One continuous, sectioned sheet: dark practical-context header up front,
+   flat rule-divided sections below, no per-page spread/shadow pattern.
+   Same token system ( --panel1/--panel2/--soft/--accent/--deepest ). */
+
+.wbs-brief {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-plex-sans), sans-serif;
+  color: #201A14;
+  background: #DAD5C9;
+  padding: 40px 16px 96px;
+}
+
+.wbs-brief-sheet {
+  width: 760px;
+  max-width: 100%;
+  background: #EDE9E1;
+  box-shadow: 0 40px 80px rgba(20, 15, 10, 0.28), 0 4px 12px rgba(20, 15, 10, 0.15);
+}
+
+.wbs-brief-header {
+  background: linear-gradient(155deg, var(--panel1), var(--panel2));
+  color: #fff;
+  padding: 36px 44px 30px;
+}
+
+.wbs-brief-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+/* PlannerMark's wordmark defaults to --panel1 text, sized for the light
+   page background it appears on everywhere else. This header is dark. */
+.wbs-brief-header-top .wbs-mark-wordmark { color: #fff; }
+
+.wbs-brief-eyebrow {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.wbs-brief-title {
+  font-family: var(--font-plex-mono), monospace;
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 1.25;
+  margin-top: 8px;
+  color: #fff;
+}
+
+.wbs-brief-context {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.wbs-brief-context-label {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+}
+
+.wbs-brief-context-value {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.wbs-brief-context-value.wbs-brief-unconfirmed {
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.wbs-brief-body {
+  padding: 36px 44px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wbs-brief-section {
+  border-top: 1px solid rgba(32, 26, 20, 0.15);
+  padding: 26px 0;
+}
+.wbs-brief-section:first-child { border-top: none; padding-top: 0; }
+
+.wbs-brief-section-label {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--panel1);
+  margin-bottom: 14px;
+}
+
+.wbs-brief-tier-label {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(32, 26, 20, 0.55);
+  margin: 18px 0 8px;
+}
+.wbs-brief-tier-label:first-child { margin-top: 0; }
+
+.wbs-brief-empty {
+  font-size: 13.5px;
+  font-style: italic;
+  color: rgba(32, 26, 20, 0.6);
+}
+
+.wbs-brief-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 44px;
+  border-top: 1px solid rgba(32, 26, 20, 0.15);
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: rgba(32, 26, 20, 0.5);
+}
+
+@media print {
+  .wbs-brief { background: #fff; padding: 0; }
+  .wbs-brief-sheet { box-shadow: none; }
+}

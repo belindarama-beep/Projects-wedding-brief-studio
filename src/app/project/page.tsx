@@ -14,7 +14,11 @@ import type {
   Source,
 } from "@/lib/types";
 
-export default async function ProjectPage() {
+export default async function ProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const supabase = await createClient();
 
   const {
@@ -25,11 +29,18 @@ export default async function ProjectPage() {
     redirect("/login");
   }
 
-  const { data: project, error: projectError } = await supabase
+  // TEMPORARY diagnostic override for the extract-facts timeout investigation —
+  // ?project=<id> loads a specific project instead of the hardcoded Arden & Theo
+  // lookup. Revert once the image-count cost curve test is done.
+  const projectIdOverride = (await searchParams).project;
+  const query = supabase
     .from("projects")
-    .select("id, couple_names, venue, wedding_date, guest_count, budget, style_preset")
-    .ilike("couple_names", "Arden & Theo")
-    .single();
+    .select("id, couple_names, venue, wedding_date, guest_count, budget, style_preset");
+  const { data: project, error: projectError } = await (
+    typeof projectIdOverride === "string"
+      ? query.eq("id", projectIdOverride)
+      : query.ilike("couple_names", "Arden & Theo")
+  ).single();
 
   if (projectError || !project) {
     return (

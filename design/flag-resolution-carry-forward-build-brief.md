@@ -44,9 +44,11 @@ Because Extract regenerates flags with new ids on every run, this design puts an
 2. **Provenance stays with the original decision.** `resolved_by`/`resolved_at` are never rewritten by a carry-forward. See Proposed shape above for the separate `carried_forward_from_flag_id` / `carried_at` fields.
 3. **Matching is tuned for precision, not recall.** See Proposed shape above.
 
-## Prerequisite — diagnose the Extract timeout before building this
+## Prerequisite — blocked on the Extract timeout fix landing first, not just diagnosed
 
-Reported separately in conversation: both recent `extract-facts` runs on this project's current source volume landed at 143–150s, right at the function's timeout ceiling — this is a real, currently-live reliability problem independent of this brief, and needs its own resolution (likely a faster model or a raised timeout) before or alongside this build, not after it.
+The timeout investigation (`extract-facts-timeout-brief.md`) is resolved: Path 3, batching, is the chosen fix — splitting today's single Extract+Organize+Flag call into per-batch fact extraction followed by one Flag pass over the combined fact set. That directly changes the thing this brief matches against: this design proposes comparing "the newly created extraction's flags" against "the previous extraction's flags," and after batching lands, those flags come from a restructured Flag pass, not the current single call. Building this brief's matcher against today's structure would mean rebuilding it against the new one once batching ships.
+
+**Sequencing is explicit: batching first, this brief second.** Do not start implementation here until the timeout brief's Path 3 is built and validated.
 
 ## Success criteria
 

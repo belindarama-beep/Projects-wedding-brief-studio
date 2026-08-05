@@ -18,16 +18,18 @@
 
 50 text-only items — more volume than the real baseline — finished in under a minute, comfortably clear of the ceiling. Adding just 5 images (all small, under 550KB) to a *smaller* text set added roughly 60 seconds and pushed both runs to the edge of the 150s wall. **This is images specifically, not total source count or total text volume.** Text scales cheaply here; each image is adding a large, disproportionate cost — almost certainly vision tokenization plus reasoning on `claude-opus-5`, not file size.
 
-**Follow-up: the per-image cost curve, measured directly rather than projected from one point.** The same fixed 50-note text baseline was held constant while images (reused from Arden & Theo's real folder, referenced from a scratch project — not duplicated or touched) were added incrementally: 0, then 1, then 3, then 5.
+**Follow-up: a per-image cost curve was measured (0/1/3/5 images against a fixed text baseline), showing an apparent acceleration in marginal cost per image. That specific curve-shape claim has since been retracted — see below.** The underlying `extracted_items`/`flags` rows from that test were deleted during cleanup before a necessary sanity check was run against them, so the claim can no longer be verified and shouldn't be relied on. What replaced it is a cleaner, real check below.
 
-| Images | Result | Time | Marginal cost (per newly added image) |
-|---|---|---|---|
-| 0 | 200 | 86.2s | — |
-| 1 | 200 | 91.6s | +5.4s |
-| 3 | 200 | 137.4s | +22.9s/image (2 images added) |
-| 5 | **546 (timeout)** | ≥150.2s (censored — killed at the ceiling) | ≥12.8s/image, likely understated |
+**Ruling out the obvious alternative explanation: is it images specifically, or just more output to generate?** More images could plausibly mean more extracted facts and flags, and output generation is sequential — that would produce a similarly-shaped slowdown without any actual per-image processing cost, and would mean batching helps far less than assumed (splitting calls doesn't reduce total output, it just spreads the same generation cost across more calls). This was checked directly against Arden & Theo's own real, untouched extraction history — a genuine before/after pair where the *only* change between two real runs was the 5 images being added, nothing else:
 
-**This is not linear, and that matters for which path is right.** The first image cost almost nothing (+5.4s). Each image added after that cost substantially more than the one before it — the marginal cost roughly quadrupled between the 0→1 step and the 1→3 step. This is the signature of cost scaling with total context length rather than a flat per-image fee, consistent with how transformer attention cost grows superlinearly with sequence length: an image added to an already-large context (more prior text and images) costs more than the same image would added to a short one. Four data points (one of them censored by the timeout) isn't enough to fit a precise curve or extrapolate a specific "N images blows the 400s ceiling" number responsibly — but the trend itself is enough to change which path below actually addresses the problem, not just tolerates it.
+| Extraction | Sources | Extracted items | Flags | Total output (chars) | Time |
+|---|---|---|---|---|---|
+| Before images | 35 text | 41 | 23 | 17,837 | fast, no error (outside log retention) |
+| After 5 images added, nothing else changed | 40 | 42 | 24 | 17,155 | **143.2s** |
+
+Output was flat — one more extracted item, one more flag, total output character count *down* slightly — while execution time jumped from comfortably fast to the timeout ceiling. **This rules out output volume as the explanation.** Whatever is expensive here is in processing the images themselves, not in generating more content because of them.
+
+**What remains genuinely unresolved:** whether that per-image cost is linear, accelerating, or something else. The evidence that suggested acceleration is gone (see above), and this before/after real-data check only proves *that* images are expensive independent of output size — not the shape of how cost grows with image count. That would need a properly re-run, output-count-preserved version of the earlier test, not attempted here.
 
 **Timeout ceiling, confirmed via Supabase's docs (not assumed):** this is a hard platform limit, not a configurable default.
 - Free plan (current): **150s** wall clock.
@@ -40,9 +42,9 @@
 
 **Cost:** real money — Supabase Pro is a $25/month base subscription fee for the organization (plus normal compute, which a project this size mostly covers with the plan's included credit). This is a decision for you, not something I can or should action — no plan-upgrade capability is something I have access to, and it shouldn't be a unilateral call regardless.
 
-**What it buys:** less than it first appeared to. The measured curve (see above) shows accelerating, not linear, cost growth per image — so "2.7x more time" does not mean "2.7x more images." With only four data points (one censored by the timeout itself) there isn't enough to responsibly extrapolate a specific number of images the 400s ceiling would hold, but the shape of the curve means this buys less durable runway than a simple linear projection would suggest.
+**What it buys:** genuinely unknown in precise terms. Images are confirmed expensive and confirmed not explained by output volume (see above), but exactly how cost grows with image count — linear, accelerating, or otherwise — is not established with reliable evidence. "Roughly 2.7x more headroom" from the 150s→400s ratio is a fair statement of the *time* ceiling moving, but not a safe translation into "2.7x more images," since that translation assumes linearity this brief can't currently back up either way.
 
-**Explicitly a stopgap, not a fix — more so than it first looked.** It doesn't change what's expensive, it just tolerates more of it, and the curve suggests that tolerance gets consumed faster than expected as the folder grows. Doesn't preclude either path below — could be done today, immediately, independent of whatever gets built next.
+**Explicitly a stopgap, not a fix.** It doesn't change what's expensive, it just tolerates more of it — true regardless of the growth curve's exact shape. Doesn't preclude either path below — could be done today, immediately, independent of whatever gets built next.
 
 ## Path 2 — Model swap, scoped as an experiment with a pass condition
 
@@ -57,7 +59,7 @@ Run the candidate model against Arden & Theo's real, current text-only source se
 
 ## Path 3 — Batching, the one that actually addresses the diagnosis
 
-**What it is:** split source material into smaller batches so no single call processes too many images at once — the thing the isolation test shows is actually expensive, and the follow-up curve measurement shows is *accelerating*, not flat, as more images join the same context. That accelerating shape is what makes this path more than "the eventually-correct architecture" — if cost compounds with context length, small batches don't just avoid timeouts, they avoid paying the compounding penalty at all. Path 1 tolerates a bigger version of a cost that keeps growing; this path is the one that stops it from growing that way.
+**What it is:** split source material into smaller batches so no single call processes too many images at once — the thing the evidence above shows is actually expensive (and confirmed *not* an artifact of generating more output). Whether batching's benefit is proportional (cost is linear in image count, so batching mainly buys wall-clock headroom per call) or more-than-proportional (cost compounds with context length, so small batches avoid a real penalty rather than just spreading it out) is not established either way — that finer question is explicitly open, not resolved in this brief. What is established is that this is the only path of the three that addresses the actual cost driver rather than tolerating it (Path 1) or leaving it untouched entirely (Path 2, which is about output quality, not this cost).
 
 **Why this is the one that can break the product if done carelessly:** the spec has Extract deliberately re-read the *entire* folder in one call. A contradiction can only be found between two items that are present in the same reasoning pass — Arden's floral preference and Theo's, or the couple's stated wish against a family member's note, only surface as a contradiction if the model sees both at once. Naive batching (split the folder, run today's combined Extract+Organize+Flag call on each chunk independently) silently loses any contradiction whose two sides land in different batches. That failure mode is invisible — no error, just contradictions that quietly stop being found. This is exactly the kind of regression that matters most to catch, because it wouldn't be caught by watching for errors.
 

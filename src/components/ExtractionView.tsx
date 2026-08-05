@@ -49,6 +49,7 @@ export function ExtractionView({
   initialFlags,
   initialResolutions,
   initialDirectionVersions,
+  previouslyInternalOnly,
 }: {
   projectId: string;
   initialExtraction: Extraction | null;
@@ -56,6 +57,13 @@ export function ExtractionView({
   initialFlags: Flag[];
   initialResolutions: Resolution[];
   initialDirectionVersions: DirectionVersion[];
+  // Every flag ever marked internal_only on this project, across all past
+  // extractions — not just the current one. internal_only is an annotation
+  // on a flag row, and flag rows don't persist across Extract re-runs, so
+  // this is the interim, human-checked substitute for that not carrying
+  // forward automatically: a reminder to re-mark the same topic if it
+  // reappears under a new flag id.
+  previouslyInternalOnly: { id: string; description: string }[];
 }) {
   const router = useRouter();
   const [extraction, setExtraction] = useState(initialExtraction);
@@ -138,6 +146,25 @@ export function ExtractionView({
     setResolutions((prev) => ({ ...prev, [flag.id]: data as Resolution }));
   }
 
+  async function handleToggleInternalOnly(flag: Flag) {
+    const supabase = createClient();
+    const nextValue = !flag.internal_only;
+
+    const { error } = await supabase
+      .from("flags")
+      .update({ internal_only: nextValue })
+      .eq("id", flag.id);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setFlags((prev) =>
+      prev.map((f) => (f.id === flag.id ? { ...f, internal_only: nextValue } : f)),
+    );
+  }
+
   async function handleApprove() {
     setApproving(true);
     setApproveError(null);
@@ -211,6 +238,32 @@ export function ExtractionView({
           </p>
         )}
 
+        {(() => {
+          const currentFlagIds = new Set(flags.map((f) => f.id));
+          const reminders = previouslyInternalOnly.filter(
+            (f) => !currentFlagIds.has(f.id),
+          );
+          if (reminders.length === 0) return null;
+          return (
+            <div className="mb-6 rounded-lg border border-neutral-300 bg-neutral-50 p-4">
+              <h3 className="mb-2 text-sm font-medium text-neutral-700">
+                Previously marked internal-only
+              </h3>
+              <p className="mb-3 text-xs text-neutral-500">
+                Marked on an earlier extraction — check whether any of the
+                flags below cover the same ground, and mark them internal-only
+                too if so. Re-running Extract doesn&apos;t carry this forward
+                automatically yet.
+              </p>
+              <ul className="flex flex-col gap-1.5 text-sm text-neutral-700">
+                {reminders.map((f) => (
+                  <li key={f.id}>&bull; {f.description}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
+
         {flags.length > 0 && (
           <div className="mb-8">
             <h3 className="mb-3 text-sm font-medium text-neutral-600">
@@ -223,6 +276,7 @@ export function ExtractionView({
                   flag={flag}
                   resolution={resolutions[flag.id] ?? null}
                   onResolve={handleResolve}
+                  onToggleInternalOnly={handleToggleInternalOnly}
                 />
               ))}
             </ul>
@@ -287,6 +341,7 @@ function FlagRow({
   flag,
   resolution,
   onResolve,
+  onToggleInternalOnly,
 }: {
   flag: Flag;
   resolution: Resolution | null;
@@ -295,10 +350,12 @@ function FlagRow({
     method: ResolutionMethod,
     content: string | null,
   ) => Promise<void>;
+  onToggleInternalOnly: (flag: Flag) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(!resolution);
   const [freeText, setFreeText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [togglingInternal, setTogglingInternal] = useState(false);
 
   async function save(method: ResolutionMethod, content: string | null) {
     setSaving(true);
@@ -307,17 +364,39 @@ function FlagRow({
     setEditing(false);
   }
 
+  async function toggleInternal() {
+    setTogglingInternal(true);
+    await onToggleInternalOnly(flag);
+    setTogglingInternal(false);
+  }
+
   return (
     <li
       className={`rounded-lg border p-3 ${
-        flag.type === "contradiction"
-          ? "border-red-300 bg-red-50"
-          : "border-amber-300 bg-amber-50"
+        flag.internal_only
+          ? "border-neutral-400 bg-neutral-100"
+          : flag.type === "contradiction"
+            ? "border-red-300 bg-red-50"
+            : "border-amber-300 bg-amber-50"
       }`}
     >
-      <span className="mb-1 inline-block rounded-full bg-white px-2 py-0.5 text-xs uppercase tracking-wide text-neutral-600">
-        {flag.type}
-      </span>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="inline-block rounded-full bg-white px-2 py-0.5 text-xs uppercase tracking-wide text-neutral-600">
+          {flag.type}
+        </span>
+        <button
+          type="button"
+          onClick={toggleInternal}
+          disabled={togglingInternal}
+          className={`rounded-full px-2 py-0.5 text-xs disabled:opacity-50 ${
+            flag.internal_only
+              ? "bg-neutral-800 text-white"
+              : "border border-neutral-300 text-neutral-500"
+          }`}
+        >
+          {flag.internal_only ? "Internal only" : "Mark internal-only"}
+        </button>
+      </div>
       <p className="text-sm font-medium text-neutral-800">
         {flag.description}
       </p>

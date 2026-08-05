@@ -101,7 +101,7 @@ export default async function ProjectPage() {
       supabase
         .from("flags")
         .select(
-          "id, extraction_id, project_id, type, description, evidence, source_item_ids, suggested_resolutions, created_at",
+          "id, extraction_id, project_id, type, description, evidence, source_item_ids, suggested_resolutions, internal_only, created_at",
         )
         .eq("extraction_id", latestExtraction.id),
     ]);
@@ -119,6 +119,18 @@ export default async function ProjectPage() {
       resolutions = (resolutionRows ?? []) as Resolution[];
     }
   }
+
+  // Reminder list for the internal_only interim fix: every flag ever marked
+  // internal_only on this project, not just the latest extraction's — since
+  // internal_only is an annotation on a flag row and flag rows don't persist
+  // across Extract re-runs, this is what surfaces a topic that was correctly
+  // marked before and silently reset when it was re-extracted.
+  const { data: previouslyInternalOnlyRows } = await supabase
+    .from("flags")
+    .select("id, description")
+    .eq("project_id", project.id)
+    .eq("internal_only", true)
+    .order("created_at", { ascending: false });
 
   const { data: directionVersionRows } = await supabase
     .from("direction_versions")
@@ -146,6 +158,7 @@ export default async function ProjectPage() {
         initialFlags={flags}
         initialResolutions={resolutions}
         initialDirectionVersions={directionVersions}
+        previouslyInternalOnly={previouslyInternalOnlyRows ?? []}
       />
       <GenerateView
         project={project as Project}

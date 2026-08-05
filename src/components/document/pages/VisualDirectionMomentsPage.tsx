@@ -34,7 +34,7 @@ export function VisualDirectionMomentsPage({ data }: { data: CreativeDirectionDo
 
       <FineLineArch />
 
-      <HandNote>this is where we made sure it landed.</HandNote>
+      <HandNote>the parts that mattered, kept intact.</HandNote>
     </DocumentPage>
   );
 }

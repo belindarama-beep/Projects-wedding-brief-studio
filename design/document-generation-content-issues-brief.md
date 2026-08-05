@@ -59,7 +59,22 @@ Checked directly: every `<HandNote>` call across all nine page components (`grep
 
 **Confirmed instance:** the Open Questions page's hand-note — *"we haven't landed on the linen colour yet"* — is decorative copy written when that page's template was designed. It's wrong on both counts raised: table linen colour *family* is a `fixed_decision` (page 6), and the actual open item (the specific tone within that family) is a `flexible_decision` (page 7), not one of the eight real `unresolved_questions` this page actually lists. The Sign-Off page's note echoing its own headline is the same mechanism, not a pool colliding with itself — two independently-authored fixed phrases that happen to rhyme.
 
-**Severity, restated given the mechanism:** this isn't the first caught instance of an occasional matching failure — it's structural. *Every* document generated, for *every* project, gets this exact same Open Questions hand-note regardless of what that couple's actual open questions are. Any project whose real open questions don't happen to resemble a linen-colour dispute gets a wrong or floating note by default, not by exception. Not proposing anything yet, per instruction — this is the mechanism report only.
+**Severity, restated given the mechanism:** this isn't the first caught instance of an occasional matching failure — it's structural. *Every* document generated, for *every* project, gets this exact same Open Questions hand-note regardless of what that couple's actual open questions are. Any project whose real open questions don't happen to resemble a linen-colour dispute gets a wrong or floating note by default, not by exception.
+
+**Resolved:** the underlying mechanism (static per-page copy, not generated) is unchanged and not being rebuilt — this was a content fix, not an architecture fix. All eight non-cover pages' notes were reassigned by hand, each matched to the page whose actual job it names, rather than left as decorative copy chosen without reference to what the page does:
+
+| Page | Note |
+|---|---|
+| 02 — What We Understood | your story, held together. |
+| 03 — Visual Direction | the feeling, made clear. |
+| 04 — Visual Direction cont. (Colour) | every detail speaking the same language. |
+| 05 — Visual Direction cont. (Moments) | the parts that mattered, kept intact. |
+| 06 — Direction Spelled Out | nothing assumed. nothing smoothed over. |
+| 07 — Budget Tiers | real trade-offs, not upsell copy. *(kept — already correct, describes the page's method, and the rejected replacement "one shared direction" would have argued against three genuine alternatives sitting in front of the reader)* |
+| 08 — Open Questions | the open choices are still yours. |
+| 09 — Sign-off | this is what "us" looks like on paper. *(unchanged — moved from headline to note; new headline: "The direction, recorded as it stands.")* |
+
+Cover (page 01) confirmed to have no `<HandNote>` call, before and after — one per page is a maximum, not a requirement. This doesn't prevent the same class of mistake on some future page whose note is chosen without checking it against that page's actual content — the mechanism that allowed it is still exactly what it was.
 
 ## Build order
 

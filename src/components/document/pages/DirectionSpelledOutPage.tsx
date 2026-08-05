@@ -61,7 +61,7 @@ export function DirectionSpelledOutPage({ data }: { data: CreativeDirectionDocum
         </>
       )}
 
-      <HandNote>said plainly, so nothing gets papered over.</HandNote>
+      <HandNote>nothing assumed. nothing smoothed over.</HandNote>
     </DocumentPage>
   );
 }

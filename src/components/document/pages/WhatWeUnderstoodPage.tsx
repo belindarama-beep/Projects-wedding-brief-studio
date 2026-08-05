@@ -32,7 +32,7 @@ export function WhatWeUnderstoodPage({ data }: { data: CreativeDirectionDocument
         </Callout>
       )}
 
-      <HandNote>the parts that mattered, held together.</HandNote>
+      <HandNote>your story, held together.</HandNote>
     </DocumentPage>
   );
 }

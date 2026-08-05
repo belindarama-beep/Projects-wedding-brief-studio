@@ -34,7 +34,7 @@ export function OpenQuestionsPage({ data }: { data: CreativeDirectionDocumentDat
         </p>
       )}
 
-      <HandNote>we haven&apos;t landed on the linen colour yet.</HandNote>
+      <HandNote>the open choices are still yours.</HandNote>
     </DocumentPage>
   );
 }

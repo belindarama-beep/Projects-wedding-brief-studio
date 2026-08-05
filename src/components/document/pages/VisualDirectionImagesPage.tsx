@@ -39,7 +39,7 @@ export function VisualDirectionImagesPage({ data }: { data: CreativeDirectionDoc
         {direction.content.central_idea.split(".")[0]}.
       </Callout>
 
-      <HandNote>quiet, but never plain.</HandNote>
+      <HandNote>the feeling, made clear.</HandNote>
     </DocumentPage>
   );
 }

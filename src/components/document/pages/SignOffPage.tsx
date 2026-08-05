@@ -23,7 +23,7 @@ export function SignOffPage({ data }: { data: CreativeDirectionDocumentData }) {
       footerRight={project.coupleNames}
       mark={<PlannerMark logoUrl={planner.logoUrl} businessName={planner.businessName} />}
     >
-      <h1 className="wbs-headline">This is what &quot;us&quot; looks like on paper.</h1>
+      <h1 className="wbs-headline">The direction, recorded as it stands.</h1>
       <p className="wbs-body">
         This direction reflects everything you&apos;ve shared with us so far. If it still
         feels like you, let&apos;s carry it forward — if something&apos;s off, tell us and

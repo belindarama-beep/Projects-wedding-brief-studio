@@ -23,7 +23,7 @@ export function VisualDirectionColourPage({ data }: { data: CreativeDirectionDoc
       <h1 className="wbs-headline">Colour and material, held consistently.</h1>
       <p className="wbs-body">{direction.content.colour_material_direction}</p>
 
-      <HandNote>the same hand, every surface.</HandNote>
+      <HandNote>every detail speaking the same language.</HandNote>
     </DocumentPage>
   );
 }

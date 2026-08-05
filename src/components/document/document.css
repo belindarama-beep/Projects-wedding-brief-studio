@@ -219,36 +219,6 @@
   opacity: 0.92;
 }
 
-/* ---------- colour rail (functional) — colour shown as atmosphere doing
-   content work, not decorative swatches ---------- */
-.wbs-colour-rail {
-  display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 16px;
-  margin: 8px 0 20px;
-  max-width: 440px;
-}
-.wbs-colour-rail .wbs-rail {
-  border-radius: 999px;
-}
-.wbs-rail-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.wbs-rail-card {
-  min-height: 88px;
-  padding: 14px;
-  display: flex;
-  align-items: flex-end;
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  box-shadow: 0 8px 16px rgba(15, 8, 7, 0.12);
-  border-radius: 12px;
-}
-
 /* ---------- image slots — absorb 1 to ~5 uploaded images ---------- */
 .wbs-image-grid {
   position: relative;

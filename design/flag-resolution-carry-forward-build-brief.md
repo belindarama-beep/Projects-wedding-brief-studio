@@ -20,12 +20,34 @@ On the Arden & Theo project: the extraction run on 2 Aug had 23 flags, 5 of them
 
 **Why this doesn't have to wait:** unlike the resolutions matcher below, this doesn't touch or depend on the Flag pass's output shape at all — it's a UI addition plus a plain query, orthogonal to whatever batching changes about how flags get produced. There's no rebuild-it-twice cost to building this before batching lands.
 
-**Scope — deliberately crude, not the matching system below:**
-1. **A planner-facing toggle on each flag**, in `FlagRow` (`ExtractionView.tsx`), to mark or unmark it `internal_only` directly. This alone closes a gap that's existed since the original leak fix in `c37e6ab`, which explicitly noted "No Resolve-stage UI for this yet" and never got followed up — right now the *only* way to set this field is a direct database edit.
-2. **A reminder list, not a matcher.** Query every flag ever marked `internal_only` on the project — across all past extractions, not just the immediately previous one — and surface their descriptions prominently in the Extraction view whenever a fresh set of flags comes back: "Previously marked internal-only — check whether any of the flags below cover the same ground." No AI, no confidence tuning, no matching logic. It's a checklist a human reads against the new flags. Cheap, and it directly addresses the actual failure mode: the planner would have seen "family palette conflict" and "decision authority / mother funding" on that list against the 4 Aug flags and could have marked them immediately, instead of the topic silently defaulting to visible.
-3. **Non-blocking.** Approve doesn't gate on the list being cleared — this is a visibility aid, not a hard stop. A blocking gate is more machinery than a crude first pass warrants, and "did a human read a list" isn't a strong enough guarantee to justify treating it as one. Worth revisiting if this alone proves insufficient in practice.
+**Scope — deliberately crude, not the matching system below. Built:**
+1. **A planner-facing toggle on each flag**, in `FlagRow` (`ExtractionView.tsx`), to mark or unmark it `internal_only` directly. Closes a gap that's existed since the original leak fix in `c37e6ab`, which explicitly noted "No Resolve-stage UI for this yet" and never got followed up — until now the *only* way to set this field was a direct database edit.
+2. **A reminder list, not a matcher — surfaced at Approve time, not earlier in the page.** Query every flag ever marked `internal_only` on the project — across all past extractions, not just the immediately previous one — and show their descriptions directly inside the Approve card, right above the Approve button: "Before you approve — previously marked internal-only... check whether any of the flags above cover the same ground." Deliberately placed at the point of action rather than near the top of the page (where an earlier draft of this had it) — a reminder seen minutes before the relevant decision, and possibly scrolled past, isn't the same as one seen at the moment of the decision. No AI, no confidence tuning, no matching logic — a checklist a human reads against the current flags, right before they click.
+3. **Non-blocking, deliberately.** Approve doesn't gate on the list being cleared. The reminder surfaces candidates; it never marks anything `internal_only` on its own, and it never prevents Approve from proceeding — the planner decides, not the system. A blocking gate is more machinery than a crude first pass warrants, and "did a human read a list" isn't a strong enough guarantee to justify treating it as a hard stop. Worth revisiting if this alone proves insufficient in practice.
 
-**Separately available right now, independent of when this interim UI ships:** the two flags actually producing v9's leak — `933ea5c6` (decision authority / mother funding) and `e99ef38c` (family palette conflict) — can be marked `internal_only: true` today with the same one-line database edit as the original `c37e6ab` stopgap. Not done here; flagging it as available whenever wanted, not doing it unasked.
+**Separately available right now, independent of when this interim UI ships:** the two flags actually producing v9's leak — `933ea5c6` (decision authority / mother funding) and `e99ef38c` (family palette conflict) — can be marked `internal_only: true` today with the same one-line database edit as the original `c37e6ab` stopgap, or now via the toggle itself once the current flag set is in front of you. Not done here; available whenever wanted, not done unasked.
+
+## Audit: which fields could still carry internal-only content through, done but not fixed here
+
+Checked directly against the deployed `approve-direction` prompt (not assumed). Two separate protections exist, and their coverage doesn't match each other or the full field list:
+
+| Field | Prompt-level "never reference an internal-only flag" instruction | Code-level backstop (`document/[id]/page.tsx`) |
+|---|---|---|
+| `contradictions` | Yes | Yes (`flag_id`/`internal_only` cross-check) |
+| `unresolved_questions` | Yes | Yes (same cross-check) |
+| `fixed_decisions` | Yes | **No** |
+| `flexible_decisions` | Yes | **No** |
+| `central_idea` | **No** | No |
+| `visual_direction` | **No** | No |
+| `colour_material_direction` | **No** | No |
+| `priority_moments` | **No** | No |
+| `what_to_avoid` | **No** | No |
+| `budget_implications` | **No** (only the separate, narrower "traceable-only" constraint added earlier — not an internal-only prohibition) | No |
+| `budget_considerations` | **No** | No — currently "safe" only because no couple-facing component reads this field yet, which is an omission, not a guarantee; a future page could start rendering it without anyone remembering it was meant to stay planner-side |
+
+The actual v9 leak happened in exactly this gap — `budget_implications` had neither protection at the time. `fixed_decisions` and `flexible_decisions` have the prompt instruction but no structural backstop at all, relying entirely on the model following it, the same single-layer reliance that already failed once. Five fields (`central_idea`, `visual_direction`, `colour_material_direction`, `priority_moments`, `what_to_avoid`) have no coverage of any kind.
+
+**Not extending `internal_only` filtering to any of these as part of this build**, per instruction — this is the audit only. Whether that gap needs closing, and how, is a separate decision.
 
 ## Why this needs its own step, not a quick patch in Approve
 

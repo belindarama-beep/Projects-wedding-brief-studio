@@ -203,6 +203,11 @@ export function ExtractionView({
     items: items.filter((i) => i.category === category),
   }));
 
+  const currentFlagIds = new Set(flags.map((f) => f.id));
+  const internalOnlyReminders = previouslyInternalOnly.filter(
+    (f) => !currentFlagIds.has(f.id),
+  );
+
   return (
     <>
       <section className="mx-auto max-w-2xl px-4 pb-16">
@@ -237,32 +242,6 @@ export function ExtractionView({
             {extraction.source_item_ids.length === 1 ? "" : "s"}.
           </p>
         )}
-
-        {(() => {
-          const currentFlagIds = new Set(flags.map((f) => f.id));
-          const reminders = previouslyInternalOnly.filter(
-            (f) => !currentFlagIds.has(f.id),
-          );
-          if (reminders.length === 0) return null;
-          return (
-            <div className="mb-6 rounded-lg border border-neutral-300 bg-neutral-50 p-4">
-              <h3 className="mb-2 text-sm font-medium text-neutral-700">
-                Previously marked internal-only
-              </h3>
-              <p className="mb-3 text-xs text-neutral-500">
-                Marked on an earlier extraction — check whether any of the
-                flags below cover the same ground, and mark them internal-only
-                too if so. Re-running Extract doesn&apos;t carry this forward
-                automatically yet.
-              </p>
-              <ul className="flex flex-col gap-1.5 text-sm text-neutral-700">
-                {reminders.map((f) => (
-                  <li key={f.id}>&bull; {f.description}</li>
-                ))}
-              </ul>
-            </div>
-          );
-        })()}
 
         {flags.length > 0 && (
           <div className="mb-8">
@@ -309,6 +288,25 @@ export function ExtractionView({
 
         {flags.length > 0 && (
           <div className="rounded-lg border border-neutral-200 p-4">
+            {internalOnlyReminders.length > 0 && (
+              <div className="mb-4 rounded-md border border-neutral-300 bg-neutral-50 p-3">
+                <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-600">
+                  Before you approve — previously marked internal-only
+                </h4>
+                <p className="mb-2 text-xs text-neutral-500">
+                  Marked on an earlier extraction. Flags are regenerated with
+                  new ids on every Extract run, so this doesn&apos;t carry
+                  forward automatically yet — check whether any of the flags
+                  above cover the same ground, and mark them internal-only too
+                  if so, before approving.
+                </p>
+                <ul className="flex flex-col gap-1 text-sm text-neutral-700">
+                  {internalOnlyReminders.map((f) => (
+                    <li key={f.id}>&bull; {f.description}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium text-neutral-600">
                 Approve

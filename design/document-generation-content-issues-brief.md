@@ -1,6 +1,6 @@
 # Document Generation Content Issues — v9 Review Findings
 
-**Status:** three findings from reviewing the generated v9 document. One is a scoped, ready-to-build fix. Two are design questions laid out with options and costs, decisions owed back before anything is built. One is noted only, no fix designed. Nothing has been built from this document.
+**Status:** three findings from reviewing the generated v9 document, all now decided. Build order is set — see bottom of this document.
 
 ---
 
@@ -23,7 +23,9 @@ The field's own instruction in `approve-direction`'s system prompt is: *"a short
 3. **Middle ground — allow inference, but label it as inference.** Keep synthesis of stated/resolved facts as-is, but require anything beyond that to be visibly marked as a consideration rather than blended into flat prose — e.g. a distinguishable "worth noting" phrasing convention, or a separate structured sub-field. Preserves the field's usefulness while addressing the "presented as fact" concern directly. Cost: more prompt complexity, and still depends on the model correctly self-identifying which of its own statements are inference versus restatement — the same reliability question as everything else here, just with a lower cost if it's imperfectly applied (mislabeled inference is still visibly labeled *as* inference, not silently blended in).
 4. **Move inference out of the couple-facing document entirely** — keep it available to the planner (e.g. in the Supplier Brief or a planner-only view) but not in the Creative Direction document the couple reads. Cost: removes information from the document that's arguably useful to the couple too, and doesn't fix the underlying "who is this claim actually for" ambiguity so much as relocate it.
 
-Not changing the prompt until this is decided.
+**Decided: option 4, moved out of the couple-facing document — not deleted.** Option 3 (label inference distinctly) was rejected explicitly: it relies on the model correctly self-labelling which of its own statements are inference, the same trust problem this is meant to remove, and a couple reading "we've inferred this" in a document whose job is to prove they were understood is an odd artefact regardless of labelling accuracy.
+
+The inference is genuinely useful — it just belongs where a planner can read it, act on it, or deliberately promote it into the document, not automatically blended into couple-facing prose. Concretely: `budget_implications` becomes strictly traceable to a source or a decision — confirmed figures, the stated pressure point, the tier comparison. A new field, `budget_considerations`, carries the inferred operational consequences (service labour, print cost, and similar), surfaced planner-side in `DirectionView.tsx`, never in the generated document. No "promote to document" mechanism is being built as part of this — noted as a possible follow-up if wanted, not assumed.
 
 ## Colour swatches — options, not a fix — decision owed
 
@@ -35,7 +37,7 @@ Add a real structured field to `approve-direction`'s output schema (e.g. named c
 **Option B — remove the swatch block entirely.**
 Cost: near-zero — delete the `ColourRail` render call and adjust the surrounding layout. Loses a visual/decorative device from the document. Benefit: immediately stops the document from displaying something that can contradict its own prose. No new data model work, nothing to get wrong.
 
-Not building either until decided. (B is the cheaper option and the one that stops the contradiction fastest; A is the one that would make the swatches actually mean something. Your call.)
+**Decided: Option B, remove the block.** Beyond cost, Option A has a real problem of its own: it would make the model responsible for translating prose like "a deep blush understood as a dark rose just before it turns red" into a hex value and presenting that as fact on a couple-facing page — a fairly consequential interpretive act nobody actually made, dressed up as a decision. Page 4's prose is already specific and vivid enough to carry the section on its own. If the page reads thin without the block, that's a composition problem to solve with the existing device framework, not a reason to keep a contradictory element.
 
 ## Images — third instance of the same pattern, noted only
 
@@ -47,9 +49,9 @@ A planner decision made at one stage doesn't persist back into the pipeline stag
 
 Not designing a fix for this. Noted so the next time this pattern surfaces, it's recognized as the fourth instance of something systemic rather than investigated fresh again.
 
-## Decisions owed
+## Build order
 
-1. **`budget_implications`'s inference boundary** — one of the four options above (or something else).
-2. **Colour swatches** — Option A (structured extraction) or Option B (remove).
-
-Everything else here (the `planner_notes` reference fix, the images note) doesn't need a decision to proceed or is explicitly not being acted on yet.
+1. `planner_notes` reference prompt fix (smallest, unambiguous).
+2. `internal_only` interim UI + reminder list (`flag-resolution-carry-forward-build-brief.md`) — the live leak, highest real-world cost of delay.
+3. The two decisions above — `budget_considerations` split, colour swatch removal.
+4. Images — untouched, no fix designed yet.

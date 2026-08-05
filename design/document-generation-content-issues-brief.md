@@ -1,6 +1,6 @@
 # Document Generation Content Issues — v9 Review Findings
 
-**Status:** three findings from reviewing the generated v9 document, all now decided. Build order is set — see bottom of this document.
+**Status:** three findings from the v9 review, all decided and built (see Build order at the bottom). Two more from the v10 review, added below — mechanism confirmed for both, no fix proposed for either yet.
 
 ---
 
@@ -47,7 +47,19 @@ A planner decision made at one stage doesn't persist back into the pipeline stag
 2. **`internal_only` markings** don't persist across Extract re-runs (same brief, interim fix).
 3. **Image curation** — confirmed here: `documents.selected_image_ids` (the planner's deliberate choice of which images represent the visual direction, including excluding one for violating the no-suspended-installation rule) is stored only on the `documents` row, per-generation. It never reaches `extract-facts` or `approve-direction`. The open question on page 8 (*"What is the status of the five unattributed image references?"*) covers all five originally-uploaded images, including the one already excluded by curation — because the exclusion decision and the flag-generation pipeline have no way to know about each other.
 
+**Escalation, confirmed on v10:** this is no longer merely disconnected — it's now visibly wrong to a reader. `unresolved_questions` on v10 carries `flag_id: c774038d` with text **byte-identical** to v9's, naming "a merlot cake with pale pink sugar flowers on a gold stand" as one of five images under question — the same cake image that was deliberately excluded from this generation's selection and does not appear anywhere in the document. A reader comparing page 3's three images against page 8's description of five can now directly catch the mismatch.
+
+**Mechanism, confirmed by reading `approve-direction`'s source directly (not inferred):** the question's content is fixed entirely by whichever flag Extract produced. Approve never queries `documents.selected_image_ids` — it isn't in any query the function makes — so it has no way to know a curation decision happened. The byte-identical text between v9 and v10 confirms Approve re-serialized the same flag verbatim rather than regenerating anything; it only changes if the underlying flag is resolved, marked internal-only, or a new Extract run produces something different for the same topic. **Any future fix has to touch the flag itself — Resolve or Extract — not Approve, not Generate, and not `selected_image_ids` directly.** Not designing that fix here.
+
 Not designing a fix for this. Noted so the next time this pattern surfaces, it's recognized as the fourth instance of something systemic rather than investigated fresh again.
+
+## Hand-notes are static per-page copy, not generated or pooled
+
+Checked directly: every `<HandNote>` call across all nine page components (`grep -rn "HandNote" src/components/document/pages/*.tsx`) is a literal hardcoded string written into that page's JSX — one fixed phrase per page template, authored once. There is no pool of phrases, no per-page generation from the page's actual approved content, no retrieval or matching logic of any kind. This is a third mechanism, different from either hypothesis it was checked against (page-aware generation, or a pool placed without page awareness).
+
+**Confirmed instance:** the Open Questions page's hand-note — *"we haven't landed on the linen colour yet"* — is decorative copy written when that page's template was designed. It's wrong on both counts raised: table linen colour *family* is a `fixed_decision` (page 6), and the actual open item (the specific tone within that family) is a `flexible_decision` (page 7), not one of the eight real `unresolved_questions` this page actually lists. The Sign-Off page's note echoing its own headline is the same mechanism, not a pool colliding with itself — two independently-authored fixed phrases that happen to rhyme.
+
+**Severity, restated given the mechanism:** this isn't the first caught instance of an occasional matching failure — it's structural. *Every* document generated, for *every* project, gets this exact same Open Questions hand-note regardless of what that couple's actual open questions are. Any project whose real open questions don't happen to resemble a linen-colour dispute gets a wrong or floating note by default, not by exception. Not proposing anything yet, per instruction — this is the mechanism report only.
 
 ## Build order
 

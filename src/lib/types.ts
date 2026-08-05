@@ -85,7 +85,15 @@ export type DirectionVersionContent = {
   // as "can't verify against a flag," never as "safe to show."
   contradictions: { topic: string; description: string; flag_id?: string }[];
   unresolved_questions: { question: string; context: string; flag_id?: string }[];
+  // Strictly traceable to a source or a resolution — confirmed figures, the
+  // stated pressure point, nothing inferred. Safe for the couple-facing
+  // document.
   budget_implications: string;
+  // Inferred operational consequences (e.g. "may affect catering service
+  // labour") that aren't traceable to any single Extracted Item or
+  // Resolution — planner-facing only, never rendered in the generated
+  // document. Absent on versions approved before this field existed.
+  budget_considerations?: string[];
 };
 
 export type DirectionDiff = {

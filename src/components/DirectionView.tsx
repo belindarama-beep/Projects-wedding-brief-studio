@@ -124,6 +124,21 @@ export function DirectionView({ versions }: { versions: DirectionVersion[] }) {
           </p>
         </div>
 
+        {content.budget_considerations && content.budget_considerations.length > 0 && (
+          <div>
+            <h3 className="mb-1 text-sm font-medium text-neutral-600">
+              Budget considerations (planner-only — not shown to the couple)
+            </h3>
+            <ul className="flex flex-col gap-1">
+              {content.budget_considerations.map((item, i) => (
+                <li key={i} className="text-sm text-neutral-800">
+                  • {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {content.contradictions.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-medium text-neutral-600">

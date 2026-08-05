@@ -27,27 +27,29 @@ On the Arden & Theo project: the extraction run on 2 Aug had 23 flags, 5 of them
 
 **Separately available right now, independent of when this interim UI ships:** the two flags actually producing v9's leak — `933ea5c6` (decision authority / mother funding) and `e99ef38c` (family palette conflict) — can be marked `internal_only: true` today with the same one-line database edit as the original `c37e6ab` stopgap, or now via the toggle itself once the current flag set is in front of you. Not done here; available whenever wanted, not done unasked.
 
-## Audit: which fields could still carry internal-only content through, done but not fixed here
+## Audit: which fields could still carry internal-only content through
 
-Checked directly against the deployed `approve-direction` prompt (not assumed). Two separate protections exist, and their coverage doesn't match each other or the full field list:
+Checked directly against the deployed `approve-direction` prompt (not assumed). Two separate protections exist, and — as of this update — their coverage no longer matches, on purpose.
 
-| Field | Prompt-level "never reference an internal-only flag" instruction | Code-level backstop (`document/[id]/page.tsx`) |
+**Prompt-level: extended to every field, not just four.** Previously the "never reference an internal-only flag" instruction named four fields explicitly (`contradictions`, `unresolved_questions`, `fixed_decisions`, `flexible_decisions`). That enumeration is gone. The instruction now reads "anywhere in the generated record — not in any field," and names the five narrative fields (`central_idea`, `visual_direction`, `colour_material_direction`, `priority_moments`, `what_to_avoid`) explicitly as being just as capable of carrying a funding sentence or family-disagreement reference as a `fixed_decision` is. This closes the exact gap `budget_implications` fell through in v9 — not by adding `budget_implications` to a list, but by removing the list entirely, so no future field can fall through the same way by simply not having been named.
+
+**Code-level backstop: unchanged, still 2 fields, and this asymmetry is deliberate.** `document/[id]/page.tsx`'s backstop filters `contradictions` and `unresolved_questions` by cross-checking each entry's `flag_id` against a fresh, current query of `flags.internal_only` — catching the case where a flag was internal-only at generation time but the model included it anyway, or the reverse. This is **not being extended** to match the prompt's new scope, and it structurally can't be: the backstop works by looking up a `flag_id` and checking that specific flag's current `internal_only` status. `central_idea`, `visual_direction`, `colour_material_direction`, `priority_moments`, `what_to_avoid`, `fixed_decisions`, `flexible_decisions`, and `budget_implications` are free prose or plain string arrays — nothing in their shape references a `flag_id`, so there is nothing for a backstop to check against. Structurally filtering them would mean re-deriving which sentences relate to which flag from prose alone, which is a different, much harder problem, not a bigger version of the same cross-check.
+
+| Field | Prompt-level instruction | Code-level backstop |
 |---|---|---|
 | `contradictions` | Yes | Yes (`flag_id`/`internal_only` cross-check) |
 | `unresolved_questions` | Yes | Yes (same cross-check) |
-| `fixed_decisions` | Yes | **No** |
-| `flexible_decisions` | Yes | **No** |
-| `central_idea` | **No** | No |
-| `visual_direction` | **No** | No |
-| `colour_material_direction` | **No** | No |
-| `priority_moments` | **No** | No |
-| `what_to_avoid` | **No** | No |
-| `budget_implications` | **No** (only the separate, narrower "traceable-only" constraint added earlier — not an internal-only prohibition) | No |
-| `budget_considerations` | **No** | No — currently "safe" only because no couple-facing component reads this field yet, which is an omission, not a guarantee; a future page could start rendering it without anyone remembering it was meant to stay planner-side |
+| `fixed_decisions` | Yes | No — no `flag_id` to check |
+| `flexible_decisions` | Yes | No — no `flag_id` to check |
+| `central_idea` | Yes | No — no `flag_id` to check |
+| `visual_direction` | Yes | No — no `flag_id` to check |
+| `colour_material_direction` | Yes | No — no `flag_id` to check |
+| `priority_moments` | Yes | No — no `flag_id` to check |
+| `what_to_avoid` | Yes | No — no `flag_id` to check |
+| `budget_implications` | Yes | No — no `flag_id` to check |
+| `budget_considerations` | Yes | No — no `flag_id` to check; also still not rendered anywhere couple-facing, which remains an omission, not a guarantee |
 
-The actual v9 leak happened in exactly this gap — `budget_implications` had neither protection at the time. `fixed_decisions` and `flexible_decisions` have the prompt instruction but no structural backstop at all, relying entirely on the model following it, the same single-layer reliance that already failed once. Five fields (`central_idea`, `visual_direction`, `colour_material_direction`, `priority_moments`, `what_to_avoid`) have no coverage of any kind.
-
-**Not extending `internal_only` filtering to any of these as part of this build**, per instruction — this is the audit only. Whether that gap needs closing, and how, is a separate decision.
+**Write this down so it isn't later assumed away: prompt-level coverage is instruction-following, not a guarantee.** It relies on the model correctly applying a general instruction across every field it writes, the same reliance that already produced the v9 leak once, just with a narrower instruction than the current one. The code-level backstop on `contradictions`/`unresolved_questions` is the only *structural* guarantee that exists anywhere in this system — it doesn't depend on the model having followed an instruction, it deletes the content after the fact if the check fails. Nine of the eleven fields above have no structural guarantee at all, only the prompt. That gap is not closed by this change and cannot be closed by a prompt change; it would require either giving free-prose fields some form of traceable provenance (a real design problem, not attempted here) or accepting that those fields will only ever be as safe as instruction-following makes them.
 
 ## Why this needs its own step, not a quick patch in Approve
 

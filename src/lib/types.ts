@@ -15,6 +15,11 @@ export type Source = {
   transcribed_text: string | null;
   attribution: Attribution | null;
   added_at: string;
+  // Persisted, append-only batch membership for the Extract stage (Path 3,
+  // extract-facts-timeout-brief.md) — null until first batched. Never
+  // recomputed once set; carry-forward's matcher depends on this being
+  // stable across runs.
+  batch_index: number | null;
 };
 
 export type ExtractedCategory =
@@ -27,11 +32,19 @@ export type ExtractedCategory =
 
 export type FlagType = "contradiction" | "gap";
 
+export type ExtractionStatus = "running" | "complete";
+
 export type Extraction = {
   id: string;
   project_id: string;
   source_item_ids: string[];
   created_at: string;
+  // 'running' until flag-facts (Phase 2) finishes. An extraction stuck at
+  // 'running' with no matching flags is an abandoned run (e.g. a tab closed
+  // between batch calls), not a correctness problem — nothing reads its
+  // extracted_items — but this is what makes that state diagnosable rather
+  // than a silent mystery.
+  status: ExtractionStatus;
 };
 
 export type ExtractedItem = {

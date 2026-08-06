@@ -12,7 +12,10 @@ import type {
   Flag,
   Resolution,
   ResolutionMethod,
+  Source,
 } from "@/lib/types";
+
+type BatchPlanEntry = { pool: "text" | "image"; batch_index: number; count: number };
 
 const CATEGORY_LABELS: Record<ExtractedCategory, string> = {
   atmosphere: "Atmosphere",
@@ -50,6 +53,8 @@ export function ExtractionView({
   initialResolutions,
   initialDirectionVersions,
   previouslyInternalOnly,
+  sources,
+  signedUrls,
 }: {
   projectId: string;
   initialExtraction: Extraction | null;
@@ -64,6 +69,12 @@ export function ExtractionView({
   // forward automatically: a reminder to re-mark the same topic if it
   // reappears under a new flag id.
   previouslyInternalOnly: { id: string; description: string }[];
+  // For rendering a thumbnail next to any flag whose source_item_ids
+  // includes an image — Phase 2 (flag-facts) never sees images itself, only
+  // Phase 1's derived text, so this lets the planner check the model's
+  // summary against the actual photo in one glance.
+  sources: Source[];
+  signedUrls: Record<string, string>;
 }) {
   const router = useRouter();
   const [extraction, setExtraction] = useState(initialExtraction);
@@ -73,7 +84,9 @@ export function ExtractionView({
     Object.fromEntries(initialResolutions.map((r) => [r.flag_id, r])),
   );
   const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const sourceById = new Map(sources.map((s) => [s.id, s]));
 
   const [directionVersions, setDirectionVersions] = useState(
     initialDirectionVersions,
@@ -84,26 +97,81 @@ export function ExtractionView({
   async function handleRun() {
     setRunning(true);
     setError(null);
+    setProgress("Planning batches...");
 
     const supabase = createClient();
-    const { data, error } = await supabase.functions.invoke("extract-facts", {
-      body: { project_id: projectId },
+
+    // Plan mode: assigns batch_index to any new source items (append-only),
+    // creates the parent extraction, and returns the batch plan to drive.
+    const { data: planData, error: planError } = await supabase.functions.invoke(
+      "extract-facts",
+      { body: { project_id: projectId } },
+    );
+
+    if (planError || planData?.error) {
+      setRunning(false);
+      setProgress(null);
+      setError(
+        planError ? await readFunctionError(planError, planError.message) : planData.error,
+      );
+      return;
+    }
+
+    const newExtraction = planData.extraction as Extraction;
+    const batches = planData.batches as BatchPlanEntry[];
+    const collectedItems: ExtractedItem[] = [];
+
+    // Phase 1: one edge function call per batch, sequentially, so progress
+    // reflects the real checkpoints the batching architecture already
+    // knows — not invented granularity. If this fails partway, the
+    // extraction stays 'running' (abandoned, not corrupted) rather than
+    // silently completing with a partial fact set.
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i];
+      setProgress(`Processing batch ${i + 1} of ${batches.length} (${batch.pool})...`);
+
+      const { data: batchData, error: batchError } = await supabase.functions.invoke(
+        "extract-facts",
+        {
+          body: {
+            project_id: projectId,
+            extraction_id: newExtraction.id,
+            pool: batch.pool,
+            batch_index: batch.batch_index,
+          },
+        },
+      );
+
+      if (batchError || batchData?.error) {
+        setRunning(false);
+        setProgress(null);
+        setError(
+          batchError ? await readFunctionError(batchError, batchError.message) : batchData.error,
+        );
+        return;
+      }
+
+      collectedItems.push(...((batchData.extracted_items ?? []) as ExtractedItem[]));
+    }
+
+    // Phase 2: contradiction/gap detection over the complete combined fact
+    // set from every batch, text-only.
+    setProgress("Finding contradictions across everything found so far...");
+    const { data: flagData, error: flagError } = await supabase.functions.invoke("flag-facts", {
+      body: { project_id: projectId, extraction_id: newExtraction.id },
     });
 
     setRunning(false);
+    setProgress(null);
 
-    if (error) {
-      setError(await readFunctionError(error, error.message));
-      return;
-    }
-    if (data?.error) {
-      setError(data.error);
+    if (flagError || flagData?.error) {
+      setError(flagError ? await readFunctionError(flagError, flagError.message) : flagData.error);
       return;
     }
 
-    setExtraction(data.extraction);
-    setItems(data.extracted_items ?? []);
-    setFlags(data.flags ?? []);
+    setExtraction({ ...newExtraction, status: "complete" });
+    setItems(collectedItems);
+    setFlags(flagData.flags ?? []);
     setResolutions({});
   }
 
@@ -219,7 +287,7 @@ export function ExtractionView({
             disabled={running}
             className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {running ? "Running extraction..." : "Run extraction"}
+            {running ? progress ?? "Running extraction..." : "Run extraction"}
           </button>
         </div>
 
@@ -256,6 +324,8 @@ export function ExtractionView({
                   resolution={resolutions[flag.id] ?? null}
                   onResolve={handleResolve}
                   onToggleInternalOnly={handleToggleInternalOnly}
+                  sourceById={sourceById}
+                  signedUrls={signedUrls}
                 />
               ))}
             </ul>
@@ -340,6 +410,8 @@ function FlagRow({
   resolution,
   onResolve,
   onToggleInternalOnly,
+  sourceById,
+  signedUrls,
 }: {
   flag: Flag;
   resolution: Resolution | null;
@@ -349,7 +421,19 @@ function FlagRow({
     content: string | null,
   ) => Promise<void>;
   onToggleInternalOnly: (flag: Flag) => Promise<void>;
+  sourceById: Map<string, Source>;
+  signedUrls: Record<string, string>;
 }) {
+  // Phase 2 (flag-facts) never sees images — only Phase 1's derived text —
+  // so this is the mitigation for that fidelity loss: let the planner check
+  // the model's summary against the actual photo directly, rather than
+  // trusting a compressed textual claim about it sight unseen.
+  const imageUrls = flag.source_item_ids
+    .map((id) => sourceById.get(id))
+    .filter((s): s is Source => !!s && s.type === "image" && !!s.file_path)
+    .map((s) => signedUrls[s.file_path!])
+    .filter((url): url is string => !!url);
+
   const [editing, setEditing] = useState(!resolution);
   const [freeText, setFreeText] = useState("");
   const [saving, setSaving] = useState(false);
@@ -400,6 +484,19 @@ function FlagRow({
       </p>
       {flag.evidence && (
         <p className="mt-1 text-sm text-neutral-600">{flag.evidence}</p>
+      )}
+      {imageUrls.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {imageUrls.map((url) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={url}
+              src={url}
+              alt="Source image cited by this flag"
+              className="h-20 w-20 rounded-md object-cover"
+            />
+          ))}
+        </div>
       )}
 
       {!editing && resolution && (

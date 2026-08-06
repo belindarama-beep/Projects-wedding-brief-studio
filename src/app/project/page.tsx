@@ -80,7 +80,7 @@ export default async function ProjectPage() {
 
   const { data: latestExtraction } = await supabase
     .from("extractions")
-    .select("id, project_id, source_item_ids, created_at")
+    .select("id, project_id, source_item_ids, created_at, status")
     .eq("project_id", project.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -159,6 +159,8 @@ export default async function ProjectPage() {
         initialResolutions={resolutions}
         initialDirectionVersions={directionVersions}
         previouslyInternalOnly={previouslyInternalOnlyRows ?? []}
+        sources={typedSources}
+        signedUrls={signedUrls}
       />
       <GenerateView
         project={project as Project}

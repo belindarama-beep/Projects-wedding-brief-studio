@@ -1,5 +1,7 @@
 # Flag Resolution Carry-Forward — Build Brief
 
+> **HOLD: extraction `3579e5a0-a0a5-4ba3-986d-4548cba158de` (Arden & Theo) must not be approved until source-level marking ships.** The private clause — "Arden does not want her mother making styling decisions" — lives in `extracted_items` row `a700b8c9-7ce0-43c7-b297-e779475226d2` and reaches `approve-direction`'s prompt unfiltered. No flag in this extraction is marked `internal_only`; hand-marking one would not close this (see "Superseding design" below). Also recorded at the database level: `extractions.blocked = true` on this row, and `approve-direction` refuses to run against it server-side. Do not clear either until the fix below actually ships, not just once a flag looks marked.
+
 **Goal:** stop planner decisions attached to a flag — a resolution, or an `internal_only` marking — from silently evaporating every time Extract is re-run, so that new source material (a photo, a note) can be folded in without losing prior decisions or reopening a privacy leak. Two pieces of work, same root cause, different urgency: an interim `internal_only` fix (build now) and full resolutions carry-forward (blocked behind batching) — see the split explained below.
 
 ---

@@ -1,14 +1,17 @@
 # Edge functions — manual snapshot, not a build pipeline
 
-These three directories are a verbatim copy of what's deployed on Supabase project `rmjhcflxxxmenlqzjlwr`, taken 2026-08-05:
+These directories are a verbatim copy of what's deployed on Supabase project `rmjhcflxxxmenlqzjlwr`. Snapshot taken 2026-08-05; `extract-facts` and `flag-facts` updated 2026-08-06 for the extract-facts-timeout-brief.md batching build (Path 3):
 
-| Function | Deployed version at snapshot time |
+| Function | Deployed version |
 |---|---|
 | `approve-direction` | 11 |
 | `generate-document-content` | 4 |
-| `extract-facts` | 6 |
+| `extract-facts` | 7 — split into plan mode + Phase 1 batch mode, see file header |
+| `flag-facts` | 1 — new, Phase 2 (contradiction/gap detection over the combined fact set) |
 
 They were transcribed directly from `mcp__Supabase__get_edge_function` / the exact content last deployed via `mcp__Supabase__deploy_edge_function`, with no cleanup, refactoring, or fixes applied during the copy — this is meant to be an accurate record of what's running, not a reviewed or improved version of it.
+
+**`extract-facts`'s single call became two functions,** matching the two-phase split extract-facts-timeout-brief.md (Path 3) requires to keep contradiction detection working across batches: `extract-facts` now only does fact classification, per batch; `flag-facts` runs once per extraction over every batch's combined output. Both still `claude-opus-5` — this is an architecture change, not the model swap gated in that brief (Path 2).
 
 **This is a snapshot, not a synced source of truth.** Deploying via the Supabase MCP tools (or the dashboard) does not touch these files, and editing these files does not deploy anything — see "Deployment workflow" below for what closes that gap and what doesn't yet.
 
@@ -26,6 +29,10 @@ A single bounded retry (one retry, 5s delay) around the Anthropic call, only for
 ## Deployment workflow going forward
 
 **What's not possible in this environment today:** the Supabase CLI (`supabase functions deploy`) isn't installed here, and this session has no direct network path to `*.supabase.co` — deploys can only happen through the `mcp__Supabase__deploy_edge_function` MCP tool, which takes inline file content as a parameter, not a git reference. There's also no CI configured in this repo (`.github/workflows` doesn't exist) that could run `supabase functions deploy` on push, which is the standard way to get "edit the file, commit, CI deploys" — that would need a Supabase access token stored as a GitHub Actions secret and a workflow file added, neither of which exists yet.
+
+Confirmed directly during the 2026-08-06 batching build, not assumed: a plain `curl` to `rmjhcflxxxmenlqzjlwr.supabase.co` from this environment returns a 403 at the proxy level (policy denial, not a credentials issue) — meaning there's also no way to *invoke* a deployed function (to test it, time it, or validate its output) from this kind of session, only to deploy one via the MCP tool. Running or timing an extraction against real project data needs an environment with actual network reach to the project (the live app in a real browser, or a differently-provisioned session) — not something this environment can do on its own.
+
+**The same drift class exists for migrations, unaddressed:** `mcp__Supabase__list_migrations` shows 12 migrations applied to this project with no corresponding files anywhere in this repo (nothing under `supabase/migrations/` before today). Everything from `core_schema` through `add_flags_internal_only` exists only as applied history on Supabase, the same gap the edge-function snapshot above closed for functions. Migrations added from 2026-08-06 onward (starting with `extract_batching_schema`) follow the commit-then-apply discipline; the 12 that predate this aren't backfilled here — noted so it isn't assumed already covered.
 
 **What that means practically, until one of those is set up:** the discipline has to be manual — edit the file under `supabase/functions/<name>/index.ts` in this repo first, commit it, *then* deploy that same content via the MCP tool (or CLI/dashboard) as a separate, immediately-following step. That doesn't prevent drift on its own — nothing stops a future deploy from skipping the commit — but it at least makes "the repo is the draft, Supabase is what's live" the normal order of operations instead of the reverse, which is what produced today's gap.
 

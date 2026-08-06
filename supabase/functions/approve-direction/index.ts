@@ -188,6 +188,21 @@ Deno.serve(async (req) => {
       return json({ error: 'No extraction has been run for this project yet' }, 400)
     }
 
+    // Server-side, not just a UI gate a direct call could bypass — see
+    // flag-resolution-carry-forward-build-brief.md's HOLD note. Set via
+    // extractions.blocked, not inferred from flags: a flag's internal_only
+    // status is exactly what this hold exists because of not trusting.
+    if (latestExtraction.blocked) {
+      return json(
+        {
+          error:
+            latestExtraction.blocked_reason ??
+            'This extraction is blocked from approval.',
+        },
+        403,
+      )
+    }
+
     const [{ data: extractedItems, error: itemsError }, { data: flags, error: flagsError }] = await Promise.all([
       userClient.from('extracted_items').select('*').eq('extraction_id', latestExtraction.id),
       userClient.from('flags').select('*').eq('extraction_id', latestExtraction.id),

@@ -80,7 +80,7 @@ export default async function ProjectPage() {
 
   const { data: latestExtraction } = await supabase
     .from("extractions")
-    .select("id, project_id, source_item_ids, created_at, status")
+    .select("id, project_id, source_item_ids, created_at, status, blocked, blocked_reason")
     .eq("project_id", project.id)
     .order("created_at", { ascending: false })
     .limit(1)

@@ -45,6 +45,11 @@ export type Extraction = {
   // extracted_items — but this is what makes that state diagnosable rather
   // than a silent mystery.
   status: ExtractionStatus;
+  // Server-enforced hold, not a UI-only convention — approve-direction
+  // refuses to run against a blocked extraction regardless of what the
+  // client shows. See flag-resolution-carry-forward-build-brief.md.
+  blocked: boolean;
+  blocked_reason: string | null;
 };
 
 export type ExtractedItem = {

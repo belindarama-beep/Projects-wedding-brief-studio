@@ -358,6 +358,17 @@ export function ExtractionView({
 
         {flags.length > 0 && (
           <div className="rounded-lg border border-neutral-200 p-4">
+            {extraction?.blocked && (
+              <div className="mb-4 rounded-md border border-red-400 bg-red-50 p-3">
+                <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-red-700">
+                  Blocked from approval
+                </h4>
+                <p className="text-sm text-red-800">
+                  {extraction.blocked_reason ??
+                    "This extraction is blocked from approval."}
+                </p>
+              </div>
+            )}
             {internalOnlyReminders.length > 0 && (
               <div className="mb-4 rounded-md border border-neutral-300 bg-neutral-50 p-3">
                 <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-neutral-600">
@@ -384,14 +395,17 @@ export function ExtractionView({
               <button
                 type="button"
                 onClick={handleApprove}
-                disabled={approving}
+                disabled={approving || !!extraction?.blocked}
+                title={extraction?.blocked ? extraction.blocked_reason ?? undefined : undefined}
                 className="rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {approving
                   ? "Approving..."
-                  : directionVersions.length > 0
-                    ? "Approve new version"
-                    : "Approve this direction"}
+                  : extraction?.blocked
+                    ? "Blocked from approval"
+                    : directionVersions.length > 0
+                      ? "Approve new version"
+                      : "Approve this direction"}
               </button>
             </div>
             {approveError && (

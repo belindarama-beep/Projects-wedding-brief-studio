@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Phase C prompt-assembly verification against real project data — contains
+# real sensitive content by construction (the "before" capture has to, to
+# prove the "after" one excludes it). Never commit these; regenerate locally
+# per supabase/functions/approve-direction/phase-c-verification/README.md.
+# The synthetic fixture pair in the same directory is fabricated data and is
+# committed deliberately — this rule does not apply to it.
+supabase/functions/approve-direction/phase-c-verification/before.json
+supabase/functions/approve-direction/phase-c-verification/after.json
+supabase/functions/approve-direction/phase-c-verification/prompt-before.txt
+supabase/functions/approve-direction/phase-c-verification/prompt-after.txt

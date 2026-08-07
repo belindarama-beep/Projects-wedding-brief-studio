@@ -39,7 +39,7 @@ The report confirmed why this distinction is load-bearing. Path 3 of the current
 
 Recommendation: distinct name at source level (`exclude_from_direction`, or similar), `flags.internal_only` semantics untouched. Final call is yours; make it before the migration is written.
 
-**Retained:** the flag-level toggle stays, scoped to sensitivity that emerges from juxtaposition — where neither source is sensitive alone.
+**Retained, as a principle, not a pair of special cases:** the flag-level toggle covers sensitivity that exists at the flag level and nowhere below it. Juxtaposition-emergent sensitivity (neither source is sensitive alone, the combination a flag makes explicit is) and zero-citation gaps (§3.1 — nothing to derive from at all) are two instances of that principle, not two separately-justified exceptions. Written as a principle rather than an enumeration because it also covers whatever third instance neither the report nor this brief has thought of yet — that's the point of naming the principle instead of the list.
 
 ## 3. Amendments from the investigation
 
@@ -50,6 +50,12 @@ Both array columns are `NOT NULL DEFAULT '{}'` with no foreign key. The citation
 An extracted item with an empty `source_item_ids` can never be excluded by any source marking. Silently. The derivation is exactly as trustworthy as the model's citation discipline during extraction.
 
 **Phase B precondition:** count rows in `extracted_items` and `flags` with `source_item_ids = '{}'`, broken down by extraction. Report before building. If the count is non-zero this is a decision — fail extraction on uncited items, or surface them in the UI as unprotectable — not a detail to route around.
+
+**Measured, 2026-08-06: `extracted_items` — 0 of 198, every extraction. `flags` — 1 of 106**, a single `type: 'gap'` flag ("No dietary requirements, accessibility needs, or children/plus-one policy discussed") whose empty citation is by design, not a lapse — both edge functions' system prompts explicitly permit a gap to cite nothing, since a gap is an absence, there's nothing to point at. This is the finding that actually mattered: `extracted_items` is the path with no fallback at all — it goes into `approve-direction`'s prompt directly, no per-item toggle exists, derivation is the only mechanism. Zero empty citations there is what let this build proceed to the migration without a redesign.
+
+**Do not read 1-in-106 as "rare, therefore safe."** That's the base rate of zero-citation gaps in general, which says nothing about the rate of *sensitive* zero-citation gaps specifically — that number is unobservable until one occurs. Treat the category as live, not marginal, going forward.
+
+**The asymmetry, named rather than smoothed over:** for a zero-citation gap, the only available protection is the flag-level toggle — the instruction-level guarantee (2.2), not the structural one. The one case source-level marking cannot reach is also the case that falls back to the weaker of the two. Not fixable inside this build's scope; recorded here so it's a known limitation, not something discovered later by someone reading the code.
 
 ### 3.2 The two toggles carry different guarantees, and the UI must say so
 
@@ -66,6 +72,12 @@ Source-level exclusion is exactly as granular as the planner's note-taking habit
 A planner can restate sensitive content in a free-text resolution on an unrelated flag. No mechanism catches it — the content has no traceable link back to a marked source. This is a copy problem, not a code problem.
 
 And the primary trade-off, which must appear at the point of marking: marking a source removes it from the direction entirely, not just from the couple's view. The planner loses that material from their own document too. If the copy doesn't say so, planners will mark liberally and wonder why the direction thinned out.
+
+### 3.5 Open question for Phase D, deferred — not built now
+
+The flag-level toggle's current behaviour (unchanged by this build, per §2.3) includes the marked flag's description/evidence in `approve-direction`'s prompt so the model can summarise it into `planner_notes` — inclusion is required for that to work. For the juxtaposition case that's necessary: the sensitivity only exists in the combination, and the model needs to see it to know what to leave out downstream.
+
+For a zero-citation gap (§3.1), that reason doesn't apply — there's no combination to summarise, no downstream field that needs the model to have seen it. Full exclusion (never entering the prompt, same guarantee as source-level marking) may be available for this specific sub-case where it structurally isn't for the juxtaposition one. Not designed or built here — flagged so it survives to Phase D rather than being decided implicitly by reusing the existing toggle behaviour unexamined.
 
 ## 4. Investigation — complete
 
@@ -93,7 +105,7 @@ The twelve pre-06-Aug orphan migrations stay out of scope — different problem,
 
 **Phase C — exclusion in `approve-direction`.** Filter at prompt assembly, on the `extracted_items` query and the flag buckets both. Verify by diffing the assembled prompt with and without a marked source — the excluded text absent from the payload, not merely from the output.
 
-**Phase D — UI.** Marking control on `SourceRow` with untruncated raw content per 3.3; exclusion indicator on derived items; trade-off copy per 3.4; the two-guarantees distinction per 3.2. Copy comes to review before it ships.
+**Phase D — UI.** Marking control on `SourceRow` with untruncated raw content per 3.3; exclusion indicator on derived items; trade-off copy per 3.4; the two-guarantees distinction per 3.2. Resolve the open question in 3.5 (full exclusion for zero-citation gaps) before touching the flag-level toggle's prompt-inclusion behaviour, if this phase goes there at all. Copy comes to review before it ships.
 
 **Phase E — backfill.** Mark `39319398` only. Not the five sources the six flags collectively cite. The other four (`e30892da`, `23e8a816`, `a6bafa23`, `a6245660`) appear as the other side of each contradiction — evidence citation, not sensitivity. `a6245660` alone is cited by at least eleven extracted items across the project's full history (guest count, venue, palette, metal finish, rule-outs); marking it would strip confirmed decisions from every future direction. `39319398` is cited by exactly one extracted item per extraction — clean, narrow, correct.
 

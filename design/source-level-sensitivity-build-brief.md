@@ -1,6 +1,6 @@
 # Build brief — source-level sensitivity marking
 
-**Status:** Section 4 investigation complete and reviewed. Ready for Phase B.
+**Status:** Phases A, B, C complete and deployed. Ready for Phase D.
 **Branch:** cut from `main`
 **Blocks:** release of the hold on extraction `3579e5a0`; everything downstream of Approve
 **Related:** `flag-resolution-carry-forward-build-brief.md` (carries the HOLD note)
@@ -101,9 +101,17 @@ Rename the local files to match the applied ledger exactly. Never edit the ledge
 
 The twelve pre-06-Aug orphan migrations stay out of scope — different problem, no repo file to rename.
 
+**Done.** Preserved apply order (`014650` → `014659` → `195654` still ascending — the one way a version-prefix rename could have quietly broken things, checked, didn't).
+
 **Phase B — schema + derivation.** First: the empty-array count from 3.1. Report and stop if non-zero. Then the migration (as a repo file in `supabase/migrations/`, committed) adding the source-level field, and the derivation view or shared helper. No consumers yet. Verify by query: mark a source in a scratch project, confirm the correct extracted items and flags read as sensitive via array overlap.
 
+**Done.** Empty-array count: `extracted_items` 0/198 (the path with no fallback — this is the result that mattered), `flags` 1/106 (a zero-citation gap, by design, see 3.1). Field named `source_items.exclude_from_direction boolean NOT NULL DEFAULT false`, with `excluded_at timestamptz` and `excluded_note text` as companions. Derivation as two views, `extracted_items_with_sensitivity` and `flags_with_sensitivity`, both `security_invoker = true` (without it, a view runs as its owner and can silently bypass RLS — checked, not assumed, given this build's whole subject is access control). Verified against a scratch project (Sam & Priya, not Arden & Theo): marked one source, inserted one extracted_item and one flag citing it plus one extracted_item citing an unmarked source, confirmed `is_excluded` computed correctly through both views, cleaned up after — zero leftover rows, source unmarked.
+
 **Phase C — exclusion in `approve-direction`.** Filter at prompt assembly, on the `extracted_items` query and the flag buckets both. Verify by diffing the assembled prompt with and without a marked source — the excluded text absent from the payload, not merely from the output.
+
+**Done.** `approve-direction` now queries `extracted_items_with_sensitivity` / `flags_with_sensitivity` with `.eq('is_excluded', false)` instead of the raw tables — an excluded row is never fetched, so it structurally cannot land in `internalOnlyFlags` or any other bucket; there is no later filtering step to get wrong. Verified as a captured artifact, not a log scan: rendered the real assembled prompt for Arden & Theo's extraction `3579e5a0` twice — source `39319398` unmarked, then marked (and immediately unmarked again after capture, live project left unmodified) — and diffed the two files. The diff removed exactly 3 lines (the one extracted_item citing the source, plus a contradiction and a gap flag that also cited it — the gap wasn't the one flagged in the original backfill analysis, but the array-overlap mechanism caught it correctly regardless, which is the point of deriving rather than hand-listing). `grep -c` for "does not want her mother making styling decisions": 1 match unmarked, 0 marked. Broader check, `grep -c "mother"`: 0 in the marked prompt — not just the phrase, the topic doesn't surface at all. Tooling for reproducing this lives in `supabase/functions/approve-direction/phase-c-verification/`; the captured data itself is deliberately not committed (see that directory's README) — it's Arden & Theo's real sensitive material by construction.
+
+**Confirmed, not fixed, per scope:** `previousApproved.content` is a third, separate path into the prompt that this filtering doesn't touch — a stored JSON artifact from a prior approval, pasted back in on every subsequent run regardless of what gets marked afterward. Checked directly, not assumed: all 13 of Arden & Theo's existing approved `direction_versions` mention the mother/funding topic; several, including the latest (v13), contain "styling decisions" verbatim — confined to `planner_notes` in v13 specifically (not leaked into a couple-facing field this time), but stored, and due to re-enter the prompt on the very next approval once the hold on `3579e5a0` lifts. Left as a `KNOWN GAP` comment in `index.ts` at the `previousApproved` block, not silently absorbed into Phase C's scope.
 
 **Phase D — UI.** Marking control on `SourceRow` with untruncated raw content per 3.3; exclusion indicator on derived items; trade-off copy per 3.4; the two-guarantees distinction per 3.2. Resolve the open question in 3.5 (full exclusion for zero-citation gaps) before touching the flag-level toggle's prompt-inclusion behaviour, if this phase goes there at all. Copy comes to review before it ships.
 

@@ -203,9 +203,26 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Source-level sensitivity marking (source-level-sensitivity-build-brief.md).
+    // Querying the derivation views with is_excluded=false means an excluded
+    // extracted_item or flag is never fetched at all — not filtered out
+    // after the fact, not routed into internalOnlyFlags below. There is no
+    // later point in this function where an excluded flag could end up in
+    // any of the three buckets (resolved/open/internal-only), because it
+    // was never in `flags` to begin with. That's deliberate: internalOnlyFlags
+    // is read into the prompt (to inform planner_notes), which is exactly
+    // what a source-level exclusion must never do.
     const [{ data: extractedItems, error: itemsError }, { data: flags, error: flagsError }] = await Promise.all([
-      userClient.from('extracted_items').select('*').eq('extraction_id', latestExtraction.id),
-      userClient.from('flags').select('*').eq('extraction_id', latestExtraction.id),
+      userClient
+        .from('extracted_items_with_sensitivity')
+        .select('*')
+        .eq('extraction_id', latestExtraction.id)
+        .eq('is_excluded', false),
+      userClient
+        .from('flags_with_sensitivity')
+        .select('*')
+        .eq('extraction_id', latestExtraction.id)
+        .eq('is_excluded', false),
     ])
 
     if (itemsError || flagsError) {
@@ -307,6 +324,14 @@ Deno.serve(async (req) => {
     }
     if (internalOnlyFlags.length === 0) promptLines.push('(none)')
 
+    // KNOWN GAP, confirmed not fixed here (source-level-sensitivity-build-brief.md
+    // Phase C report): this is a third, separate path into the prompt that the
+    // is_excluded filtering above does not touch. previousApproved.content is a
+    // stored artifact from a prior run — if a source gets marked *after* that
+    // version was approved, its content (including planner_notes) still gets
+    // JSON-stringified back in here on every subsequent approval. Confirmed live
+    // on Arden & Theo: v13's planner_notes already contains the sensitive
+    // material this build's marking is meant to keep out of the prompt.
     if (previousApproved) {
       promptLines.push('')
       promptLines.push(

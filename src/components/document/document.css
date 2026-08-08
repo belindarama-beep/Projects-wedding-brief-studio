@@ -207,8 +207,8 @@
   margin: 10px 0 20px;
 }
 
-/* ---------- ink-sweep circle (gestural) — one sweep, rhythm from the dots ---------- */
-.wbs-ink-sweep {
+/* ---------- contour fold (gestural) — an offset fold, one direction change ---------- */
+.wbs-contour-fold {
   margin: 10px 0 20px;
 }
 

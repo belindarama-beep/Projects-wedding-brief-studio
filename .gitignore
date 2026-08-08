@@ -50,3 +50,13 @@ supabase/functions/approve-direction/phase-c-verification/before.json
 supabase/functions/approve-direction/phase-c-verification/after.json
 supabase/functions/approve-direction/phase-c-verification/prompt-before.txt
 supabase/functions/approve-direction/phase-c-verification/prompt-after.txt
+
+# Phase E1 feed-forward verification — same reasoning as Phase C above, and
+# this one additionally captures a real approved direction_versions row
+# (previousApproved.content), which is exactly the leak path being proven
+# closed. Never commit these; regenerate locally per
+# supabase/functions/approve-direction/phase-e1-verification/README.md.
+supabase/functions/approve-direction/phase-e1-verification/before.json
+supabase/functions/approve-direction/phase-e1-verification/after.json
+supabase/functions/approve-direction/phase-e1-verification/prompt-before.txt
+supabase/functions/approve-direction/phase-e1-verification/prompt-after.txt

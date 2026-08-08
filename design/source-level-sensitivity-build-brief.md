@@ -1,6 +1,6 @@
 # Build brief — source-level sensitivity marking
 
-**Status:** Phases A, B, C, D complete. Phase D copy reviewed and revised before shipping (tooltips replaced with confirmation-gated panels on the mark actions only; jargon swept per the core engine spec's translation table; client-side `is_excluded` made transitional with the view as source of truth). Ready for Phase E, pending separate go-ahead.
+**Status:** Phases A, B, C, D complete. Phase E1 (feed-forward rule) complete and deployed, closing the Phase C `KNOWN GAP`. E2 (confirmation panel copy) drafted, not shipped. E3 (backfill) and E4 (hold release) not started — each is its own stop.
 **Branch:** cut from `main`
 **Blocks:** release of the hold on extraction `3579e5a0`; everything downstream of Approve
 **Related:** `flag-resolution-carry-forward-build-brief.md` (carries the HOLD note)
@@ -127,11 +127,21 @@ Fixed a real §2.1 violation caught in review before it shipped: `ExtractionView
 
 `npx tsc --noEmit` and `npx eslint` clean on both touched files. Not built, per explicit scope: `previousApproved.content` (still just the `KNOWN GAP` comment from Phase C) and the §3.5 full-exclusion question. Phase E backfill still holds.
 
-**Phase E — backfill.** Mark `39319398` only. Not the five sources the six flags collectively cite. The other four (`e30892da`, `23e8a816`, `a6bafa23`, `a6245660`) appear as the other side of each contradiction — evidence citation, not sensitivity. `a6245660` alone is cited by at least eleven extracted items across the project's full history (guest count, venue, palette, metal finish, rule-outs); marking it would strip confirmed decisions from every future direction. `39319398` is cited by exactly one extracted item per extraction — clean, narrow, correct.
+**Phase E — backfill and hold release, in four stopped steps: E1 (feed-forward rule), E2 (confirmation-panel copy), E3 (backfill), E4 (hold release).**
 
-Produce a report of everything `39319398` now excludes before confirming.
+**E1 — the feed-forward rule.** `approve-direction`'s `previousApproved` no longer feeds its `content` into the prompt if it was approved before the most recent `excluded_at` on any of the project's `source_items`. This is what closes the Phase C `KNOWN GAP`: a stored approved `direction_versions` row was the third, undocumented leak path Phase C's own filtering couldn't touch, because it reads a snapshot written before that filtering ever ran.
 
-Hold release on `3579e5a0` is not part of this build. After A–E, as a separate deliberate `UPDATE`, once a regenerated direction has been diffed and confirmed clean.
+**Done.** `previousApproved` is still used for `nextVersionNumber` (`previousApproved ? previousApproved.version_number + 1 : 1`, unchanged) — immutability and version numbering are untouched, only what feeds the *prompt* changes. A new `previousApprovedForPrompt` is computed separately: `previousApproved` unless `mostRecentExclusion.excluded_at` (the latest `excluded_at` across the project's `source_items`, fetched via one extra query) postdates `previousApproved.approved_at`, in which case it's `null` and falls through the existing first-approval branch — no second branch invented, per instruction. Where no source has ever been marked, `mostRecentExclusion` is `null` and behaviour is unchanged.
+
+Verified as a captured artifact (`supabase/functions/approve-direction/phase-e1-verification/`, same method as Phase C): rendered the real assembled prompt for `3579e5a0` twice — before and after marking source `39319398` (immediately unmarked after capture, live project left unmodified). The diff removed the same 3 lines Phase C already accounts for, **and** replaced the entire `Previous approved direction (version 13, ...)` block — the full JSON-stringified content of v13, including its `planner_notes` — with `This is the first approved direction for this project. There is no previous version.` `grep -c "mother"`: 4 in the "before" prompt, 0 in "after". One precision correction to the Phase C report, recorded in the E1 README: the literal phrase Phase C originally grepped for ("does not want her mother making styling decisions") turns out to live in `extracted_items`/`flags` (Phase C's own mechanism, 3 of the 4 occurrences), not in v13's `planner_notes`, which paraphrases the same topic rather than repeating it verbatim — it's that paraphrase, the 4th occurrence, that E1 removes. Both are zero after. Synthetic fixture pair committed in the same directory, real captures gitignored, matching the Phase C pattern exactly.
+
+Deployed as `approve-direction` v15, byte-verified against disk.
+
+**E2 — confirmation panel copy: drafted, not yet shipped.**
+
+**E3 — backfill: not yet started.**
+
+**E4 — hold release: not yet started.**
 
 ## 6. Validation harness
 

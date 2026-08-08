@@ -252,6 +252,32 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle()
 
+    // Feed-forward rule (source-level-sensitivity-build-brief.md Phase E1,
+    // closes the KNOWN GAP left open by Phase C): previousApproved is still
+    // used below for version numbering — nothing about a prior version's
+    // identity or history changes — but it must not feed its *content* into
+    // this prompt if a source was marked exclude_from_direction after that
+    // version was approved. Otherwise Phase C's is_excluded filtering on
+    // extracted_items/flags would be undone by the older version's own
+    // content re-entering here verbatim, including whatever was in its
+    // planner_notes at approval time.
+    const { data: mostRecentExclusion } = await userClient
+      .from('source_items')
+      .select('excluded_at')
+      .eq('project_id', project_id)
+      .not('excluded_at', 'is', null)
+      .order('excluded_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    const previousApprovedForPrompt =
+      previousApproved &&
+      mostRecentExclusion?.excluded_at &&
+      new Date(previousApproved.approved_at).getTime() <
+        new Date(mostRecentExclusion.excluded_at).getTime()
+        ? null
+        : previousApproved
+
     const CATEGORY_LABELS: Record<string, string> = {
       atmosphere: 'Atmosphere',
       formality: 'Formality',
@@ -324,20 +350,17 @@ Deno.serve(async (req) => {
     }
     if (internalOnlyFlags.length === 0) promptLines.push('(none)')
 
-    // KNOWN GAP, confirmed not fixed here (source-level-sensitivity-build-brief.md
-    // Phase C report): this is a third, separate path into the prompt that the
-    // is_excluded filtering above does not touch. previousApproved.content is a
-    // stored artifact from a prior run — if a source gets marked *after* that
-    // version was approved, its content (including planner_notes) still gets
-    // JSON-stringified back in here on every subsequent approval. Confirmed live
-    // on Arden & Theo: v13's planner_notes already contains the sensitive
-    // material this build's marking is meant to keep out of the prompt.
-    if (previousApproved) {
+    // previousApprovedForPrompt is null both for a genuine first approval and
+    // for one suppressed by the feed-forward rule above — deliberately the
+    // same branch, not a second one, so a suppressed version's own content
+    // (which may predate a source getting marked) can't reach the prompt
+    // through a differently-worded path either.
+    if (previousApprovedForPrompt) {
       promptLines.push('')
       promptLines.push(
-        `Previous approved direction (version ${previousApproved.version_number}, approved ${previousApproved.approved_at}):`,
+        `Previous approved direction (version ${previousApprovedForPrompt.version_number}, approved ${previousApprovedForPrompt.approved_at}):`,
       )
-      promptLines.push(JSON.stringify(previousApproved.content))
+      promptLines.push(JSON.stringify(previousApprovedForPrompt.content))
     } else {
       promptLines.push('')
       promptLines.push('This is the first approved direction for this project. There is no previous version.')

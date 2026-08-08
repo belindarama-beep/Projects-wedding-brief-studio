@@ -1,0 +1,79 @@
+{
+  "project": {
+    "couple_names": "Fixture Couple",
+    "venue": "Fixture Venue",
+    "wedding_date": "2099-01-01",
+    "guest_count": 10,
+    "budget": null
+  },
+  "extracted_items": [
+    {
+      "id": "syn-item-1",
+      "category": "atmosphere",
+      "content": "SYNTHETIC FIXTURE DATA: warm string-lit courtyard reception."
+    },
+    {
+      "id": "syn-item-2",
+      "category": "colour_material",
+      "content": "SYNTHETIC FIXTURE DATA: sage green and terracotta palette."
+    },
+    {
+      "id": "syn-item-3",
+      "category": "guest_experience",
+      "content": "SYNTHETIC FIXTURE DATA: seated dinner for 10 guests under a marquee."
+    },
+    {
+      "id": "syn-item-4",
+      "category": "floral_approach",
+      "content": "SYNTHETIC FIXTURE DATA: loose wildflower arrangements in glass jars."
+    },
+    {
+      "id": "syn-item-5",
+      "category": "exclusions",
+      "content": "SYNTHETIC FIXTURE DATA: no synthetic flowers, no cold-toned lighting."
+    },
+    {
+      "id": "syn-item-sensitive",
+      "category": "exclusions",
+      "content": "SYNTHETIC FIXTURE DATA — FABRICATED, NOT REAL: Partner A's sibling is quietly funding the catering and does not want Partner B's parents to find out."
+    }
+  ],
+  "flags": [
+    {
+      "id": "syn-flag-1",
+      "type": "contradiction",
+      "description": "SYNTHETIC FIXTURE DATA: sage/terracotta palette conflicts with the marquee's default white drape.",
+      "evidence": "SYNTHETIC FIXTURE DATA: 'sage green and terracotta palette' vs 'marquee comes with white drape as standard'.",
+      "internal_only": false
+    },
+    {
+      "id": "syn-flag-2",
+      "type": "gap",
+      "description": "SYNTHETIC FIXTURE DATA: no lighting plan recorded despite an evening reception.",
+      "evidence": "SYNTHETIC FIXTURE DATA: searched all facts for lighting detail; none found.",
+      "internal_only": false
+    },
+    {
+      "id": "syn-flag-sensitive",
+      "type": "contradiction",
+      "description": "SYNTHETIC FIXTURE DATA — FABRICATED: catering funded quietly by Partner A's sibling conflicts with the couple's stated 'fully joint spend, no surprises' budget approach.",
+      "evidence": "SYNTHETIC FIXTURE DATA: 'Partner A's sibling is quietly funding the catering' vs 'we want every cost to be fully joint, no surprises for either side'.",
+      "internal_only": false
+    }
+  ],
+  "resolutions": [],
+  "previous_approved": {
+    "version_number": 3,
+    "approved_at": "2099-01-01T00:00:00.000Z",
+    "content": {
+      "central_idea": "SYNTHETIC FIXTURE DATA: a warm, string-lit courtyard reception for ten.",
+      "planner_notes": [
+        "SYNTHETIC FIXTURE DATA — FABRICATED, NOT REAL: one partner's sibling is quietly funding the catering; keep this out of couple-facing material."
+      ]
+    }
+  },
+  "source_items": [
+    { "excluded_at": null },
+    { "excluded_at": null }
+  ]
+}

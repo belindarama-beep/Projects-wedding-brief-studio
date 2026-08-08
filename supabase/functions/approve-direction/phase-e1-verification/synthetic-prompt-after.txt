@@ -1,0 +1,23 @@
+Project: Fixture Couple
+Venue: Fixture Venue
+Date: 2099-01-01
+Guest count: 10
+
+Extracted items:
+- [Atmosphere] SYNTHETIC FIXTURE DATA: warm string-lit courtyard reception.
+- [Colour & material] SYNTHETIC FIXTURE DATA: sage green and terracotta palette.
+- [Guest experience] SYNTHETIC FIXTURE DATA: seated dinner for 10 guests under a marquee.
+- [Floral approach] SYNTHETIC FIXTURE DATA: loose wildflower arrangements in glass jars.
+- [Exclusions] SYNTHETIC FIXTURE DATA: no synthetic flowers, no cold-toned lighting.
+
+Resolved (write these up as locked-in decisions, not as open contradictions/questions):
+(none)
+
+Still open (the planner has not resolved these — include every one of these, and only these, in contradictions/unresolved_questions; do not add any others; copy each id exactly into that entry's flag_id):
+- [id: syn-flag-1] [contradiction] SYNTHETIC FIXTURE DATA: sage/terracotta palette conflicts with the marquee's default white drape. — Evidence: SYNTHETIC FIXTURE DATA: 'sage green and terracotta palette' vs 'marquee comes with white drape as standard'.
+- [id: syn-flag-2] [gap] SYNTHETIC FIXTURE DATA: no lighting plan recorded despite an evening reception. — Evidence: SYNTHETIC FIXTURE DATA: searched all facts for lighting detail; none found.
+
+Internal only (NEVER put these, or any softened/generic reference to them, anywhere in the generated record — not in any field — summarize in planner_notes only):
+(none)
+
+This is the first approved direction for this project. There is no previous version.

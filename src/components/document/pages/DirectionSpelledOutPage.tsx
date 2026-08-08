@@ -1,7 +1,7 @@
 import { DocumentPage } from "../DocumentPage";
 import { PlannerMark } from "../PlannerMark";
 import { HandNote } from "../Callout";
-import { ContourFold } from "../devices/ContourFold";
+import { GinkgoLeaf } from "../devices/GinkgoLeaf";
 import type { CreativeDirectionDocumentData } from "@/lib/document/types";
 
 /**
@@ -26,7 +26,7 @@ export function DirectionSpelledOutPage({ data }: { data: CreativeDirectionDocum
         Some of this is decided. Some is still moving. Both are worth naming plainly.
       </p>
 
-      <ContourFold compact />
+      <GinkgoLeaf compact />
 
       {fixed_decisions.length > 0 && (
         <>

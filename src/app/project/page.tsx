@@ -46,7 +46,7 @@ export default async function ProjectPage() {
   const { data: sources, error: sourcesError } = await supabase
     .from("source_items")
     .select(
-      "id, project_id, type, raw_content, file_path, transcribed_text, attribution, added_at",
+      "id, project_id, type, raw_content, file_path, transcribed_text, attribution, added_at, batch_index, exclude_from_direction, excluded_at, excluded_note",
     )
     .eq("project_id", project.id)
     .order("added_at", { ascending: false });
@@ -92,10 +92,14 @@ export default async function ProjectPage() {
 
   if (latestExtraction) {
     const [{ data: items }, { data: flagRows }] = await Promise.all([
+      // extracted_items_with_sensitivity, not the raw table — is_excluded is
+      // shown to the planner here (unlike approve-direction, which filters
+      // it out entirely); this view is read-only display, so there's no
+      // structural-guarantee concern with including excluded rows.
       supabase
-        .from("extracted_items")
+        .from("extracted_items_with_sensitivity")
         .select(
-          "id, extraction_id, project_id, category, content, source_item_ids, created_at",
+          "id, extraction_id, project_id, category, content, source_item_ids, created_at, is_excluded",
         )
         .eq("extraction_id", latestExtraction.id),
       supabase

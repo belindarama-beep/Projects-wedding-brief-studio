@@ -169,10 +169,41 @@ export function ExtractionView({
       return;
     }
 
+    // Display-only stopgap: collectedItems comes from extract-facts'
+    // batch-mode inserts, which write to the raw extracted_items table, not
+    // the extracted_items_with_sensitivity view, so is_excluded isn't
+    // populated on these rows yet. Computed here from `sources` (already in
+    // memory) purely so the exclusion indicator isn't blank for the instant
+    // between the run finishing and the re-fetch below landing. This
+    // in-memory computation is never the source of truth — the view is —
+    // and is overwritten by the re-fetch a few lines down. Duplicating the
+    // view's array-overlap rule here would be exactly the two-definitions
+    // drift §2.1 exists to prevent if this were left standing on its own.
+    const itemsWithExclusion = collectedItems.map((item) => ({
+      ...item,
+      is_excluded: item.source_item_ids.some(
+        (id) => sourceById.get(id)?.exclude_from_direction,
+      ),
+    }));
+
     setExtraction({ ...newExtraction, status: "complete" });
-    setItems(collectedItems);
+    setItems(itemsWithExclusion);
     setFlags(flagData.flags ?? []);
     setResolutions({});
+
+    // Authoritative refresh: re-fetch through extracted_items_with_sensitivity
+    // so is_excluded on screen matches what approve-direction will actually
+    // enforce, not a client-side reconstruction of its rule.
+    const { data: refreshedItems, error: refreshError } = await supabase
+      .from("extracted_items_with_sensitivity")
+      .select(
+        "id, extraction_id, project_id, category, content, source_item_ids, created_at, is_excluded",
+      )
+      .eq("extraction_id", newExtraction.id);
+
+    if (!refreshError && refreshedItems) {
+      setItems(refreshedItems as ExtractedItem[]);
+    }
   }
 
   async function handleResolve(
@@ -341,13 +372,29 @@ export function ExtractionView({
                   <h3 className="mb-2 text-sm font-medium text-neutral-600">
                     {CATEGORY_LABELS[group.category]}
                   </h3>
+                  {/* Excluded items render struck through and dimmed rather
+                      than being hidden. Hiding them would let the direction
+                      thin out invisibly — no visible trace that something
+                      was left off the list — which is exactly the failure
+                      the exclusion trade-off copy exists to warn against. */}
                   <ul className="flex flex-col gap-1">
                     {group.items.map((item) => (
                       <li
                         key={item.id}
-                        className="rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-800"
+                        className={`flex items-start justify-between gap-2 rounded-md border px-3 py-2 text-sm ${
+                          item.is_excluded
+                            ? "border-neutral-300 bg-neutral-50 text-neutral-400"
+                            : "border-neutral-200 text-neutral-800"
+                        }`}
                       >
-                        {item.content}
+                        <span className={item.is_excluded ? "line-through" : undefined}>
+                          {item.content}
+                        </span>
+                        {item.is_excluded && (
+                          <span className="shrink-0 rounded-full bg-neutral-200 px-2 py-0.5 text-xs text-neutral-600">
+                            Excluded from direction
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -452,6 +499,11 @@ function FlagRow({
   const [freeText, setFreeText] = useState("");
   const [saving, setSaving] = useState(false);
   const [togglingInternal, setTogglingInternal] = useState(false);
+  // Gates the mark action only, same as the source-exclude confirmation —
+  // unmarking stays a single direct click. Surfaces the §3.5 residual
+  // guidance (when this toggle is the right tool vs. excluding a source
+  // instead) at the moment of the decision rather than behind a hover.
+  const [confirmingInternal, setConfirmingInternal] = useState(false);
 
   async function save(method: ResolutionMethod, content: string | null) {
     setSaving(true);
@@ -464,6 +516,15 @@ function FlagRow({
     setTogglingInternal(true);
     await onToggleInternalOnly(flag);
     setTogglingInternal(false);
+    setConfirmingInternal(false);
+  }
+
+  function handleToggleInternalClick() {
+    if (flag.internal_only) {
+      toggleInternal();
+      return;
+    }
+    setConfirmingInternal(true);
   }
 
   return (
@@ -482,7 +543,7 @@ function FlagRow({
         </span>
         <button
           type="button"
-          onClick={toggleInternal}
+          onClick={handleToggleInternalClick}
           disabled={togglingInternal}
           className={`rounded-full px-2 py-0.5 text-xs disabled:opacity-50 ${
             flag.internal_only
@@ -510,6 +571,36 @@ function FlagRow({
               className="h-20 w-20 rounded-md object-cover"
             />
           ))}
+        </div>
+      )}
+
+      {confirmingInternal && (
+        <div className="mt-3 rounded-md border border-neutral-300 bg-white p-3">
+          <p className="text-sm text-neutral-700">
+            Only needed when a flag is sensitive because of how two notes
+            combine, or has no specific note behind it. If the sensitive
+            detail lives in one note, exclude that note instead, back in the
+            source folder — that keeps it out of every draft, not just the
+            approved creative direction.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={toggleInternal}
+              disabled={togglingInternal}
+              className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+            >
+              Mark internal-only
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingInternal(false)}
+              disabled={togglingInternal}
+              className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs text-neutral-600 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 

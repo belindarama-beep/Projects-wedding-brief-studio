@@ -34,6 +34,38 @@ export function CollectView({
     setSources((prev) => [source, ...prev]);
   }
 
+  async function handleToggleExcluded(source: Source) {
+    const nextValue = !source.exclude_from_direction;
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from("source_items")
+      .update({
+        exclude_from_direction: nextValue,
+        excluded_at: nextValue ? new Date().toISOString() : null,
+        excluded_note: nextValue ? source.excluded_note : null,
+      })
+      .eq("id", source.id);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    setSources((prev) =>
+      prev.map((s) =>
+        s.id === source.id
+          ? {
+              ...s,
+              exclude_from_direction: nextValue,
+              excluded_at: nextValue ? new Date().toISOString() : null,
+              excluded_note: nextValue ? s.excluded_note : null,
+            }
+          : s,
+      ),
+    );
+  }
+
   async function handleAddNote(e: React.FormEvent) {
     e.preventDefault();
     if (!noteText.trim()) return;
@@ -192,6 +224,7 @@ export function CollectView({
               key={source.id}
               source={source}
               signedUrl={source.file_path ? signedUrls[source.file_path] : undefined}
+              onToggleExcluded={handleToggleExcluded}
             />
           ))}
         </ul>
@@ -230,29 +263,80 @@ function AttributionChips({
 function SourceRow({
   source,
   signedUrl,
+  onToggleExcluded,
 }: {
   source: Source;
   signedUrl?: string;
+  onToggleExcluded: (source: Source) => Promise<void>;
 }) {
+  const [toggling, setToggling] = useState(false);
+  // Gates the mark action only — unmarking stays a single direct click, no
+  // confirmation. The full trade-off copy renders in this panel, next to
+  // the note's own untruncated content just above, so the planner sees
+  // exactly what they're taking out at the moment of the decision rather
+  // than behind a hover.
+  const [confirming, setConfirming] = useState(false);
   const timestamp = new Date(source.added_at).toLocaleString("en-AU", {
     dateStyle: "medium",
     timeStyle: "short",
   });
 
+  async function toggleExcluded() {
+    setToggling(true);
+    await onToggleExcluded(source);
+    setToggling(false);
+    setConfirming(false);
+  }
+
+  function handleToggleClick() {
+    if (source.exclude_from_direction) {
+      toggleExcluded();
+      return;
+    }
+    setConfirming(true);
+  }
+
   return (
-    <li className="rounded-lg border border-neutral-200 p-3">
-      <div className="mb-1 flex items-center gap-2 text-xs text-neutral-400">
-        <span className="uppercase tracking-wide">
-          {source.type === "written_note" ? "text" : source.type}
-        </span>
-        <span>{timestamp}</span>
-        {source.attribution && (
-          <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-neutral-600">
-            {source.attribution}
+    <li
+      className={`rounded-lg border p-3 ${
+        source.exclude_from_direction
+          ? "border-neutral-400 bg-neutral-100"
+          : "border-neutral-200"
+      }`}
+    >
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-xs text-neutral-400">
+          <span className="uppercase tracking-wide">
+            {source.type === "written_note" ? "text" : source.type}
           </span>
-        )}
+          <span>{timestamp}</span>
+          {source.attribution && (
+            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-neutral-600">
+              {source.attribution}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleToggleClick}
+          disabled={toggling}
+          className={`shrink-0 rounded-full px-2 py-0.5 text-xs disabled:opacity-50 ${
+            source.exclude_from_direction
+              ? "bg-neutral-800 text-white"
+              : "border border-neutral-300 text-neutral-500"
+          }`}
+        >
+          {source.exclude_from_direction
+            ? "Excluded from direction"
+            : "Exclude from direction"}
+        </button>
       </div>
 
+      {/* Full raw_content/transcribed_text renders below, untruncated,
+          regardless of exclude_from_direction state — this is what makes
+          the toggle's own trade-off legible: the planner sees exactly what
+          they're keeping in or taking out, right next to the control that
+          decides it (source-level-sensitivity-build-brief.md §3.3). */}
       {source.type === "written_note" && (
         <p className="text-sm text-neutral-800">{source.raw_content}</p>
       )}
@@ -271,6 +355,42 @@ function SourceRow({
 
       {source.type === "voice_note" && source.transcribed_text && (
         <p className="text-sm text-neutral-800">{source.transcribed_text}</p>
+      )}
+
+      {source.exclude_from_direction && (
+        <p className="mt-2 text-xs text-neutral-500">
+          Excluded from the direction entirely.
+        </p>
+      )}
+
+      {confirming && (
+        <div className="mt-3 rounded-md border border-neutral-300 bg-white p-3">
+          <p className="text-sm text-neutral-700">
+            Removes everything drawn from this note from the direction
+            entirely — couple-facing and your own planner document both.
+            Stronger than marking a flag internal-only, which only asks the
+            system to leave it out of the wording. If this note also holds
+            something you want kept, split it into a separate note first.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={toggleExcluded}
+              disabled={toggling}
+              className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+            >
+              Exclude this note
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirming(false)}
+              disabled={toggling}
+              className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs text-neutral-600 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
     </li>
   );

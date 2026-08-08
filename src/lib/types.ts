@@ -20,6 +20,16 @@ export type Source = {
   // recomputed once set; carry-forward's matcher depends on this being
   // stable across runs.
   batch_index: number | null;
+  // Source-level sensitivity marking (source-level-sensitivity-build-brief.md).
+  // The only human-set value in the exclusion chain — extracted_items and
+  // flags derive exclusion from this at read time via
+  // extracted_items_with_sensitivity / flags_with_sensitivity, never store
+  // their own copy. excluded_at/excluded_note are set together with this
+  // and cleared together when unmarked, so a stale timestamp never survives
+  // an unmark.
+  exclude_from_direction: boolean;
+  excluded_at: string | null;
+  excluded_note: string | null;
 };
 
 export type ExtractedCategory =
@@ -60,6 +70,11 @@ export type ExtractedItem = {
   content: string;
   source_item_ids: string[];
   created_at: string;
+  // Computed by extracted_items_with_sensitivity (array overlap against
+  // currently-marked source_items), not a stored column — true if any
+  // source in source_item_ids has exclude_from_direction set. Same
+  // approve-direction never sees this item at all once it's true.
+  is_excluded: boolean;
 };
 
 export type Flag = {
